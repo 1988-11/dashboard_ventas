@@ -7,13 +7,24 @@ import plotly.graph_objects as go
 import plotly.express as px
 import unicodedata
 
+# Mensaje de bienvenida
+st.markdown(
+    """
+    # 🌟 Bienvenido al Dashboard de Ventas 🌟
+    ---
+    Este aplicativo ha sido creado con el objetivo que nuestros asesores comerciales esten informados sobre su comportamiento de ventas.
+    Aquí podrás explorar como fue el comportamiento de sus ventas desde el año 2023, gráficos interactivos y un diseño responsivo.
+    """
+)
+
+
 # 🔐 Usuarios y roles (asegurando coincidencia exacta con df['VENDEDOR'])
 USUARIOS = {
     "admin": {"password": "admin", "vendedor": "ALL"},
     "Guillermo": {"password": "47835765", "vendedor": "GUILLERMO"},
     "JorgeChavez": {"password": "5678", "vendedor": "JORGE CHAVEZ"},  # corregido
     "JoseCarlos": {"password": "77298007", "vendedor": "JOSE CARLOS"},
-    "MariaJanet": {"password": "9999", "vendedor": "MARIA JANET"},
+    "MariaJanet": {"password": "76029937", "vendedor": "MARIA JANET"},
     "Milena": {"password": "9999", "vendedor": "MILENA"},
     "WalterBejarano": {"password": "9999", "vendedor": "WALTER BEJARANO"},
     "YeseniaFlores": {"password": "9999", "vendedor": "YESENIA FLORES"},
