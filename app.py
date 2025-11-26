@@ -25,9 +25,9 @@ st.markdown(
     """
     # 🌟 Bienvenido al Dashboard de Ventas 🌟
     ---
-    Este aplicativo ha sido creado para que nuestros asesores comerciales estén informados sobre su comportamiento en ventas.
+    Este aplicativo ha sido creado con el objetivo de informar las ventas desde el año 2023 hasta la fecha.
 
-    Aquí podrá explorar cómo fue el comportamiento de sus ventas desde el año 2023, con gráficos interactivos y un diseño responsivo.
+    Saludos...!.
 
     ---
     """
