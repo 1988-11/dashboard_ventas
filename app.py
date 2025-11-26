@@ -25,7 +25,7 @@ st.markdown(
     """
     # 🌟 Bienvenido al Dashboard de Ventas 🌟
     ---
-    Este aplicativo ha sido creado con el objetivo de informar las ventas desde el año 2023 hasta la fecha.
+     Ventas desde el año 2023 hasta la fecha.
 
     Saludos...!.
 
