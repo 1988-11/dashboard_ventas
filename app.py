@@ -7,17 +7,28 @@ import plotly.graph_objects as go
 import plotly.express as px
 import unicodedata
 
+st.markdown(
+    """
+    <link rel="manifest" href="manifest.json">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+      }
+    </script>
+    """,
+    unsafe_allow_html=True
+)
 
 # 🔐 Usuarios y roles (asegurando coincidencia exacta con df['VENDEDOR'])
 USUARIOS = {
     "admin": {"password": "admin", "vendedor": "ALL"},
     "Guillermo": {"password": "47835765", "vendedor": "GUILLERMO"},
-    "JorgeChavez": {"password": "5678", "vendedor": "JORGE CHAVEZ"},  # corregido
+    "JorgeChavez": {"password": "17895862", "vendedor": "JORGE CHAVEZ"},  # corregido
     "JoseCarlos": {"password": "77298007", "vendedor": "JOSE CARLOS"},
     "MariaJanet": {"password": "76029937", "vendedor": "MARIA JANET"},
-    "Milena": {"password": "9999", "vendedor": "MILENA"},
-    "WalterBejarano": {"password": "9999", "vendedor": "WALTER BEJARANO"},
-    "YeseniaFlores": {"password": "9999", "vendedor": "YESENIA FLORES"},
+    "Milena": {"password": "09668821", "vendedor": "MILENA"},
+    "WalterBejarano": {"password": "30857970", "vendedor": "WALTER BEJARANO"},
+    "YeseniaFlores": {"password": "40368177", "vendedor": "YESENIA FLORES"},
     # agrega más vendedores según tu Excel
 }
 
