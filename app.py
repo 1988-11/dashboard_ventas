@@ -21,17 +21,17 @@ USUARIOS = {
     # agrega más vendedores según tu Excel
 }
 
-st.markdown(
-    """
+#st.markdown(
+   # """
     # 🌟 Bienvenido al Dashboard de Ventas 🌟
-    ---
-     Ventas desde el año 2023 hasta la fecha.
+  #  ---
+    # Ventas desde el año 2023 hasta la fecha.
 
-    Saludos...!.
+    #Saludos...!.
 
-    ---
-    """
-)
+   # ---
+  #  """
+#)
 
 
 # 🧭 Estado de sesión
