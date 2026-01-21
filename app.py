@@ -29,21 +29,7 @@ USUARIOS = {
     "Milena": {"password": "09668821", "vendedor": "MILENA"},
     "WalterBejarano": {"password": "30857970", "vendedor": "WALTER BEJARANO"},
     "YeseniaFlores": {"password": "40368177", "vendedor": "YESENIA FLORES"},
-    # agrega más vendedores según tu Excel
 }
-
-#st.markdown(
-   # """
-    # 🌟 Bienvenido al Dashboard de Ventas 🌟
-  #  ---
-    # Ventas desde el año 2023 hasta la fecha.
-
-    #Saludos...!.
-
-   # ---
-  #  """
-#)
-
 
 # 🧭 Estado de sesión
 if "usuario" not in st.session_state:
@@ -164,7 +150,7 @@ if "df" in st.session_state:
             <div style='background-color:#003366;padding:20px;border-radius:20px;text-align:center'>
                 <h1 style='color:white;margin-bottom:5px;'>DASHBOARD DE VENTAS</h1>
                 <h2 style='color:white;margin-top:0;'>INDUSTRIAS ELÉCTRICAS KBA SAC – TEAMWORK KBA</h2>
-                <h3 style='color:white;margin-top:0;'>2023 – 2026</h3>
+                <h3 style='color:white;margin-top:0;'>2023 – 2026</h3>  <!-- MODIFICADO PARA 2026 -->
             </div>
         """, unsafe_allow_html=True)
     with col3:
@@ -182,10 +168,10 @@ st.markdown(
 with st.container():
     st.markdown("### 🎛️ Filtros dinámicos")
 
-    col1, col2, col3, col4 = st.columns([3, 3, 3, 3])  # columnas más anchas
+    col1, col2, col3, col4 = st.columns([3, 3, 3, 3])
 
     with col1:
-        activar_filtro_mes = st.checkbox("📅 Filtrar por mes", value=False)  # inicia desactivado
+        activar_filtro_mes = st.checkbox("📅 Filtrar por mes", value=False)
         if activar_filtro_mes:
             mes = st.selectbox(
                 label="Mes",
@@ -197,11 +183,11 @@ with st.container():
             mes = None
 
     with col2:
-        activar_filtro_año = st.checkbox("📆 Filtrar por año", value=False)  # inicia desactivado
+        activar_filtro_año = st.checkbox("📆 Filtrar por año", value=False)
         if activar_filtro_año:
             año = st.selectbox(
                 label="Año",
-                options=[2023, 2024, 2025, 2026],
+                options=[2023, 2024, 2025, 2026],  # MODIFICADO PARA 2026
                 format_func=lambda x: f"Año {x}",
                 placeholder="Selecciona año",
                 label_visibility="visible"
@@ -210,7 +196,7 @@ with st.container():
             año = None
 
     with col3:
-        activar_filtro_empresa = st.checkbox("🏢 Filtrar por empresa", value=False)  # inicia desactivado
+        activar_filtro_empresa = st.checkbox("🏢 Filtrar por empresa", value=False)
         if activar_filtro_empresa:
             empresa = st.selectbox(
                 label="Empresa",
@@ -222,7 +208,7 @@ with st.container():
             empresa = None
 
     with col4:
-        activar_filtro_vendedor = st.checkbox("🧑‍💼 Filtrar por vendedor", value=False)  # inicia desactivado
+        activar_filtro_vendedor = st.checkbox("🧑‍💼 Filtrar por vendedor", value=False)
         if activar_filtro_vendedor:
             vendedores = st.multiselect(
                 label="Vendedor(es)",
@@ -257,7 +243,7 @@ with st.container():
 
     # 📋 Ventas Totales por Año – Comparativo Elegante
     st.markdown("## 📋 Ventas Totales por Año – Comparativo Elegante")
-    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
+    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
         .groupby(['EMPRESA', 'AÑO'])['TOTAL'].sum().reset_index()
 
     if not ventas_tabla.empty:
@@ -275,14 +261,14 @@ with st.container():
                 'font-size': '16px',
                 'text-align': 'center',
                 'font-family': 'Segoe UI'
-            }).set_caption("💼 Comparativo de Ventas Totales por Año (2023–2025)")
+            }).set_caption("💼 Comparativo de Ventas Totales por Año (2023–2026)")  # MODIFICADO PARA 2026
         )
     else:
         st.info("ℹ️ No hay datos para el comparativo con el contexto actual.")
 
-    # 📈 Comportamiento de las Ventas 2023–2026
+    # 📈 Comportamiento de las Ventas 2023–2026  # MODIFICADO PARA 2026
     st.markdown("## 📈 Comportamiento de las Ventas 2023–2026")
-    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
+    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
         .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_crecimiento.empty:
@@ -318,7 +304,7 @@ with st.container():
 
     # 📉 Descenso de Ventas por Año
     st.markdown("## 📉 Descenso de Ventas por Año")
-    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
+    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
         .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_por_año.empty and len(ventas_por_año) > 1:
@@ -363,19 +349,18 @@ with st.container():
     else:
         st.info("ℹ️ No hay suficientes datos para calcular el descenso con el contexto actual.")
 
-    # 📈 Ventas Mensuales por Año – Comparativo 2023–2026
+    # 📈 Ventas Mensuales por Año – Comparativo 2023–2026  # MODIFICADO PARA 2026
     st.markdown("## 📈 Ventas Mensuales por Año – Comparativo 2023–2026")
-    df_3años = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])]
-    ventas_por_mes = df_3años.groupby(['AÑO', 'MES'])['TOTAL'].sum().reset_index()
+    df_4años = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])]  # MODIFICADO PARA 2026
+    ventas_por_mes = df_4años.groupby(['AÑO', 'MES'])['TOTAL'].sum().reset_index()
 
     if not ventas_por_mes.empty:
         orden_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
         ventas_por_mes['MES'] = pd.Categorical(ventas_por_mes['MES'], categories=orden_meses, ordered=True)
         ventas_por_mes = ventas_por_mes.sort_values(['AÑO', 'MES'])
-        # Agregar color para 2026 en el diccionario colores:
-        colores = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF', 2026: '#FF69B4'}  # rosa para 2026
+        colores = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF', 2026: '#FF69B4'}  # MODIFICADO PARA 2026 (rosa para 2026)
         fig_comparativo = go.Figure()
-        for año_g in [2023, 2024, 2025, 2026]:
+        for año_g in [2023, 2024, 2025, 2026]:  # MODIFICADO PARA 2026
             datos_año = ventas_por_mes[ventas_por_mes['AÑO'] == año_g]
             fig_comparativo.add_trace(go.Scatter(
                 x=datos_año['MES'], y=datos_año['TOTAL'],
@@ -385,7 +370,7 @@ with st.container():
                 text=[f"S/ {v:,.0f}" for v in datos_año['TOTAL']], textposition='top center'
             ))
         fig_comparativo.update_layout(
-            title="📊 VENTAS REPRESENTADAS EN MESES – 2023, 2024, 2025, 2026",
+            title="📊 VENTAS REPRESENTADAS EN MESES – 2023, 2024, 2025, 2026",  # MODIFICADO PARA 2026
             xaxis_title="Mes",
             yaxis=dict(title="Ventas Totales (S/)", tickformat=",.0f"),
             plot_bgcolor='black', paper_bgcolor='black',
@@ -396,10 +381,17 @@ with st.container():
     else:
         st.info("ℹ️ No hay datos mensuales con el contexto actual.")
 
-    # 📋 Ventas Mensuales por Vendedor – Año 2025 y 2026
-    st.markdown("## 📋 Ventas Mensuales por Vendedor – Año 2026")
-    df_2025 = df_base[(df_base['AÑO'] == 2025) & (df_base['VENDEDOR'].str.upper() != "ANULADO")]
-    ventas_mensuales = df_2025.groupby(['VENDEDOR', 'MES'])['TOTAL'].sum().reset_index()
+    # 📋 Ventas Mensuales por Vendedor – Selector de Año  # MEJORADO
+    st.markdown("## 📋 Ventas Mensuales por Vendedor")
+    año_vendedor = st.selectbox(
+        "Seleccionar año para ventas por vendedor:", 
+        [2023, 2024, 2025, 2026],  # MODIFICADO PARA 2026
+        index=2,  # Por defecto 2025
+        key="selector_año_vendedor"
+    )
+    
+    df_año_vendedor = df_base[(df_base['AÑO'] == año_vendedor) & (df_base['VENDEDOR'].str.upper() != "ANULADO")]
+    ventas_mensuales = df_año_vendedor.groupby(['VENDEDOR', 'MES'])['TOTAL'].sum().reset_index()
 
     if not ventas_mensuales.empty:
         tabla_mensual = ventas_mensuales.pivot(index='MES', columns='VENDEDOR', values='TOTAL')
@@ -413,25 +405,25 @@ with st.container():
                 'background-color': '#ffffff', 'color': '#000000',
                 'border': '1px solid #cccccc', 'font-size': '15px',
                 'text-align': 'center', 'font-family': 'Segoe UI'
-            }).set_caption("📆 Ventas por Vendedor por Mes – 2025 (con Totales)")
+            }).set_caption(f"📆 Ventas por Vendedor por Mes – {año_vendedor} (con Totales)")  # MODIFICADO PARA DINÁMICO
         )
     else:
-        st.info("ℹ️ No hay datos de vendedores en 2025 con el contexto actual.")
+        st.info(f"ℹ️ No hay datos de vendedores en {año_vendedor} con el contexto actual.")
 
-    # 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025, 2026
+    # 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025, 2026  # MODIFICADO PARA 2026
     st.markdown("## 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025, 2026")
-    colores_barras = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF'}
+    colores_barras = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF', 2026: '#FF69B4'}  # MODIFICADO PARA 2026
 
     for empresa_actual in ['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA']:
         st.markdown(f"### 🏢 {empresa_actual}")
-        df_empresa = df_base[(df_base['EMPRESA'] == empresa_actual) & (df_base['AÑO'].isin([2023, 2024, 2025, 2026]))]
+        df_empresa = df_base[(df_base['EMPRESA'] == empresa_actual) & (df_base['AÑO'].isin([2023, 2024, 2025, 2026]))]  # MODIFICADO PARA 2026
         resumen = df_empresa.groupby(['AÑO', 'MES'])['TOTAL'].sum().reset_index()
         if not resumen.empty:
             orden_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
             resumen['MES'] = pd.Categorical(resumen['MES'], categories=orden_meses, ordered=True)
             resumen = resumen.sort_values(['AÑO', 'MES'])
             fig_empresa = go.Figure()
-            for año_g in [2023, 2024, 2025, 2026]:
+            for año_g in [2023, 2024, 2025, 2026]:  # MODIFICADO PARA 2026
                 datos_año = resumen[resumen['AÑO'] == año_g]
                 fig_empresa.add_trace(go.Bar(
                     x=datos_año['MES'], y=datos_año['TOTAL'],
@@ -450,88 +442,77 @@ with st.container():
             st.info(f"ℹ️ No hay datos para {empresa_actual} con el contexto actual.")
 
     # 🔝 Ranking de Clientes por Empresa con filtro de año
-            st.markdown("## 🔝 Ranking de Clientes por Empresa")
+    st.markdown("## 🔝 Ranking de Clientes por Empresa")
 
-# 🎛️ Filtro de año (aplica a ambos rankings)
-            año_ranking = st.selectbox(
-    "📆 Selecciona el año para ver el Top 15 clientes:",
-            [2023, 2024, 2025, 2026],
-            index=0
-)
-
-# 🔝 Ranking de Clientes por Empresa con filtro de año
-st.markdown("## 🔝 Ranking de Clientes por Empresa")
-
-# 🎛️ Filtro de año (aplica a ambos rankings)
-año_ranking = st.selectbox(
-    "📆 Selecciona el año para ver el Top 15 clientes:",
-    [2023, 2024, 2025],
-    index=0
-)
-
-# 🔵 TEAMWORK KBA – Ranking de Clientes
-st.subheader(f"🔵 TEAMWORK KBA – Top 15 Clientes ({año_ranking})")
-clientes_tw = df_base[
-    (df_base['EMPRESA'] == 'TEAMWORK KBA') &
-    (df_base['AÑO'] == año_ranking) &
-    (df_base['CLIENTE'].str.upper() != "ANULADO")
-]
-
-if vendedor_actual != "ALL":
-    clientes_tw = clientes_tw[clientes_tw['VENDEDOR'] == vendedor_actual]
-
-clientes_tw = clientes_tw.groupby('CLIENTE', as_index=False)['TOTAL'].sum() \
-    .sort_values('TOTAL', ascending=False).head(15)
-
-if not clientes_tw.empty:
-    fig_tw = px.bar(
-        clientes_tw, x='TOTAL', y='CLIENTE', orientation='h',
-        text=clientes_tw['TOTAL'].apply(lambda x: f"S/ {x:,.0f}"),
-        template='plotly_dark', color='TOTAL'
+    # 🎛️ Filtro de año (aplica a ambos rankings) - MODIFICADO PARA 2026
+    año_ranking = st.selectbox(
+        "📆 Selecciona el año para ver el Top 15 clientes:",
+        [2023, 2024, 2025, 2026],  # MODIFICADO PARA 2026
+        index=0,
+        key="selector_año_ranking"
     )
-    fig_tw.update_traces(textposition='inside', textfont=dict(color='white', size=14))
-    fig_tw.update_layout(
-        xaxis=dict(title="Ventas Totales (S/)"),
-        yaxis=dict(title="Clientes"),
-        margin=dict(l=10, r=10, t=10, b=10)
-    )
-    st.plotly_chart(fig_tw, use_container_width=True, key=f"ranking_tw_{año_ranking}")
-else:
-    st.info(f"ℹ️ No hay clientes para TEAMWORK KBA en {año_ranking} con el contexto actual.")
 
+    # 🔵 TEAMWORK KBA – Ranking de Clientes
+    st.subheader(f"🔵 TEAMWORK KBA – Top 15 Clientes ({año_ranking})")
+    clientes_tw = df_base[
+        (df_base['EMPRESA'] == 'TEAMWORK KBA') &
+        (df_base['AÑO'] == año_ranking) &
+        (df_base['CLIENTE'].str.upper() != "ANULADO")
+    ]
 
-# 🔵 INDUSTRIAS ELÉCTRICAS KBA – Ranking de Clientes
-st.subheader(f"🔵 INDUSTRIAS ELÉCTRICAS KBA – Top 15 Clientes ({año_ranking})")
-clientes_ie = df_base[
-    (df_base['EMPRESA'] == 'INDUSTRIAS ELECTRICAS KBA') &
-    (df_base['AÑO'] == año_ranking) &
-    (df_base['CLIENTE'].str.upper() != "ANULADO")
-]
+    if vendedor_actual != "ALL":
+        clientes_tw = clientes_tw[clientes_tw['VENDEDOR'] == vendedor_actual]
 
-if vendedor_actual != "ALL":
-    clientes_ie = clientes_ie[clientes_ie['VENDEDOR'] == vendedor_actual]
+    clientes_tw = clientes_tw.groupby('CLIENTE', as_index=False)['TOTAL'].sum() \
+        .sort_values('TOTAL', ascending=False).head(15)
 
-clientes_ie = clientes_ie.groupby('CLIENTE', as_index=False)['TOTAL'].sum() \
-    .sort_values('TOTAL', ascending=False).head(15)
+    if not clientes_tw.empty:
+        fig_tw = px.bar(
+            clientes_tw, x='TOTAL', y='CLIENTE', orientation='h',
+            text=clientes_tw['TOTAL'].apply(lambda x: f"S/ {x:,.0f}"),
+            template='plotly_dark', color='TOTAL'
+        )
+        fig_tw.update_traces(textposition='inside', textfont=dict(color='white', size=14))
+        fig_tw.update_layout(
+            xaxis=dict(title="Ventas Totales (S/)"),
+            yaxis=dict(title="Clientes"),
+            margin=dict(l=10, r=10, t=10, b=10)
+        )
+        st.plotly_chart(fig_tw, use_container_width=True, key=f"ranking_tw_{año_ranking}")
+    else:
+        st.info(f"ℹ️ No hay clientes para TEAMWORK KBA en {año_ranking} con el contexto actual.")
 
-if not clientes_ie.empty:
-    fig_ie = px.bar(
-        clientes_ie, x='TOTAL', y='CLIENTE', orientation='h',
-        text=clientes_ie['TOTAL'].apply(lambda x: f"S/ {x:,.0f}"),
-        template='plotly_dark', color='TOTAL'
-    )
-    fig_ie.update_traces(textposition='inside', textfont=dict(color='white', size=14))
-    fig_ie.update_layout(
-        xaxis=dict(title="Ventas Totales (S/)"),
-        yaxis=dict(title="Clientes"),
-        margin=dict(l=10, r=10, t=10, b=10)
-    )
-    st.plotly_chart(fig_ie, use_container_width=True, key=f"ranking_ie_{año_ranking}")
-else:
-    st.info(f"ℹ️ No hay clientes para INDUSTRIAS ELÉCTRICAS KBA en {año_ranking} con el contexto actual.")
+    # 🔵 INDUSTRIAS ELÉCTRICAS KBA – Ranking de Clientes
+    st.subheader(f"🔵 INDUSTRIAS ELÉCTRICAS KBA – Top 15 Clientes ({año_ranking})")
+    clientes_ie = df_base[
+        (df_base['EMPRESA'] == 'INDUSTRIAS ELECTRICAS KBA') &
+        (df_base['AÑO'] == año_ranking) &
+        (df_base['CLIENTE'].str.upper() != "ANULADO")
+    ]
 
+    if vendedor_actual != "ALL":
+        clientes_ie = clientes_ie[clientes_ie['VENDEDOR'] == vendedor_actual]
 
-# 📊 Totales comparativos por empresa en el año seleccionado
+    clientes_ie = clientes_ie.groupby('CLIENTE', as_index=False)['TOTAL'].sum() \
+        .sort_values('TOTAL', ascending=False).head(15)
+
+    if not clientes_ie.empty:
+        fig_ie = px.bar(
+            clientes_ie, x='TOTAL', y='CLIENTE', orientation='h',
+            text=clientes_ie['TOTAL'].apply(lambda x: f"S/ {x:,.0f}"),
+            template='plotly_dark', color='TOTAL'
+        )
+        fig_ie.update_traces(textposition='inside', textfont=dict(color='white', size=14))
+        fig_ie.update_layout(
+            xaxis=dict(title="Ventas Totales (S/)"),
+            yaxis=dict(title="Clientes"),
+            margin=dict(l=10, r=10, t=10, b=10)
+        )
+        st.plotly_chart(fig_ie, use_container_width=True, key=f"ranking_ie_{año_ranking}")
+    else:
+        st.info(f"ℹ️ No hay clientes para INDUSTRIAS ELÉCTRICAS KBA en {año_ranking} con el contexto actual.")
+
+    # 📊 Totales comparativos por empresa en el año seleccionado
     st.markdown("### 📊 Totales de ventas por empresa")
     totales_empresas = df_base[df_base['AÑO'] == año_ranking].groupby('EMPRESA')['TOTAL'].sum().reset_index()
     totales_empresas['TOTAL'] = totales_empresas['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
@@ -541,13 +522,13 @@ else:
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray;'>Aplicativo desarrollado por <b>Edward O.</b> © 2025</p>", unsafe_allow_html=True)
 
-
 # 🗺️ Mapa de Provincias Atendidas
 def quitar_tildes(texto):
     return ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn')
 
 st.markdown("## 🗺️ Mapa de Provincias Atendidas")
-año_seleccionado = st.selectbox("📅 Selecciona el año:", [2023, 2024, 2025])
+# MODIFICADO PARA 2026
+año_seleccionado = st.selectbox("📅 Selecciona el año:", [2023, 2024, 2025, 2026], key="selector_año_mapa")
 
 # 🔄 Preparar datos base desde el contexto
 df_mapa_base = df_base.copy()
@@ -576,11 +557,12 @@ except Exception as e:
 
 provincia_seleccionada = st.selectbox(
     "📍 Selecciona una provincia para hacer zoom y ver distritos:",
-    ["-- Selecciona una provincia --"] + list(provincias['PROVINCIA'].unique())
+    ["-- Selecciona una provincia --"] + list(provincias['PROVINCIA'].unique()),
+    key="selector_provincia_mapa"
 )
 
 st.markdown("### 🎛️ Opciones de visualización")
-quitar_filtro_mapa = st.button("🔄 Quitar filtro y ver mapa completo")
+quitar_filtro_mapa = st.button("🔄 Quitar filtro y ver mapa completo", key="boton_quitar_filtro_mapa")
 
 # 🗺️ Vista por provincia
 if provincia_seleccionada != "-- Selecciona una provincia --" and not quitar_filtro_mapa and geojson is not None:
