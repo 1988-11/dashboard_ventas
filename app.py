@@ -243,8 +243,7 @@ with st.container():
 
     # 📋 Ventas Totales por Año – Comparativo Elegante
     st.markdown("## 📋 Ventas Totales por Año – Comparativo Elegante")
-    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
-        .groupby(['EMPRESA', 'AÑO'])['TOTAL'].sum().reset_index()
+    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])].groupby(['EMPRESA', 'AÑO'])['TOTAL'].sum().reset_index()
 
     if not ventas_tabla.empty:
         tabla_pivot = ventas_tabla.pivot(index='AÑO', columns='EMPRESA', values='TOTAL').fillna(0)
@@ -268,8 +267,7 @@ with st.container():
 
     # 📈 Comportamiento de las Ventas 2023–2026  # MODIFICADO PARA 2026
     st.markdown("## 📈 Comportamiento de las Ventas 2023–2026")
-    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
-        .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
+    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])].groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_crecimiento.empty:
         años = ventas_crecimiento['AÑO'].tolist()
@@ -304,8 +302,7 @@ with st.container():
 
     # 📉 Descenso de Ventas por Año
     st.markdown("## 📉 Descenso de Ventas por Año")
-    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \  # MODIFICADO PARA 2026
-        .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
+    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])].groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_por_año.empty and len(ventas_por_año) > 1:
         años = ventas_por_año['AÑO'].tolist()
