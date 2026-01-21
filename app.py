@@ -164,7 +164,7 @@ if "df" in st.session_state:
             <div style='background-color:#003366;padding:20px;border-radius:20px;text-align:center'>
                 <h1 style='color:white;margin-bottom:5px;'>DASHBOARD DE VENTAS</h1>
                 <h2 style='color:white;margin-top:0;'>INDUSTRIAS ELÉCTRICAS KBA SAC – TEAMWORK KBA</h2>
-                <h3 style='color:white;margin-top:0;'>2023 – 2025</h3>
+                <h3 style='color:white;margin-top:0;'>2023 – 2026</h3>
             </div>
         """, unsafe_allow_html=True)
     with col3:
@@ -201,7 +201,7 @@ with st.container():
         if activar_filtro_año:
             año = st.selectbox(
                 label="Año",
-                options=[2023, 2024, 2025],
+                options=[2023, 2024, 2025, 2026],
                 format_func=lambda x: f"Año {x}",
                 placeholder="Selecciona año",
                 label_visibility="visible"
@@ -257,7 +257,7 @@ with st.container():
 
     # 📋 Ventas Totales por Año – Comparativo Elegante
     st.markdown("## 📋 Ventas Totales por Año – Comparativo Elegante")
-    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025])] \
+    ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
         .groupby(['EMPRESA', 'AÑO'])['TOTAL'].sum().reset_index()
 
     if not ventas_tabla.empty:
@@ -280,9 +280,9 @@ with st.container():
     else:
         st.info("ℹ️ No hay datos para el comparativo con el contexto actual.")
 
-    # 📈 Comportamiento de las Ventas 2023–2025
-    st.markdown("## 📈 Comportamiento de las Ventas 2023–2025")
-    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025])] \
+    # 📈 Comportamiento de las Ventas 2023–2026
+    st.markdown("## 📈 Comportamiento de las Ventas 2023–2026")
+    ventas_crecimiento = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
         .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_crecimiento.empty:
@@ -318,7 +318,7 @@ with st.container():
 
     # 📉 Descenso de Ventas por Año
     st.markdown("## 📉 Descenso de Ventas por Año")
-    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025])] \
+    ventas_por_año = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])] \
         .groupby('AÑO')['TOTAL'].sum().reset_index().sort_values('AÑO')
 
     if not ventas_por_año.empty and len(ventas_por_año) > 1:
@@ -363,18 +363,19 @@ with st.container():
     else:
         st.info("ℹ️ No hay suficientes datos para calcular el descenso con el contexto actual.")
 
-    # 📈 Ventas Mensuales por Año – Comparativo 2023–2025
-    st.markdown("## 📈 Ventas Mensuales por Año – Comparativo 2023–2025")
-    df_3años = df_base[df_base['AÑO'].isin([2023, 2024, 2025])]
+    # 📈 Ventas Mensuales por Año – Comparativo 2023–2026
+    st.markdown("## 📈 Ventas Mensuales por Año – Comparativo 2023–2026")
+    df_3años = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])]
     ventas_por_mes = df_3años.groupby(['AÑO', 'MES'])['TOTAL'].sum().reset_index()
 
     if not ventas_por_mes.empty:
         orden_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
         ventas_por_mes['MES'] = pd.Categorical(ventas_por_mes['MES'], categories=orden_meses, ordered=True)
         ventas_por_mes = ventas_por_mes.sort_values(['AÑO', 'MES'])
-        colores = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF'}
+        # Agregar color para 2026 en el diccionario colores:
+        colores = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF', 2026: '#FF69B4'}  # rosa para 2026
         fig_comparativo = go.Figure()
-        for año_g in [2023, 2024, 2025]:
+        for año_g in [2023, 2024, 2025, 2026]:
             datos_año = ventas_por_mes[ventas_por_mes['AÑO'] == año_g]
             fig_comparativo.add_trace(go.Scatter(
                 x=datos_año['MES'], y=datos_año['TOTAL'],
@@ -384,7 +385,7 @@ with st.container():
                 text=[f"S/ {v:,.0f}" for v in datos_año['TOTAL']], textposition='top center'
             ))
         fig_comparativo.update_layout(
-            title="📊 VENTAS REPRESENTADAS EN MESES – 2023, 2024, 2025",
+            title="📊 VENTAS REPRESENTADAS EN MESES – 2023, 2024, 2025, 2026",
             xaxis_title="Mes",
             yaxis=dict(title="Ventas Totales (S/)", tickformat=",.0f"),
             plot_bgcolor='black', paper_bgcolor='black',
@@ -395,8 +396,8 @@ with st.container():
     else:
         st.info("ℹ️ No hay datos mensuales con el contexto actual.")
 
-    # 📋 Ventas Mensuales por Vendedor – Año 2025
-    st.markdown("## 📋 Ventas Mensuales por Vendedor – Año 2025")
+    # 📋 Ventas Mensuales por Vendedor – Año 2025 y 2026
+    st.markdown("## 📋 Ventas Mensuales por Vendedor – Año 2026")
     df_2025 = df_base[(df_base['AÑO'] == 2025) & (df_base['VENDEDOR'].str.upper() != "ANULADO")]
     ventas_mensuales = df_2025.groupby(['VENDEDOR', 'MES'])['TOTAL'].sum().reset_index()
 
@@ -417,20 +418,20 @@ with st.container():
     else:
         st.info("ℹ️ No hay datos de vendedores en 2025 con el contexto actual.")
 
-    # 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025
-    st.markdown("## 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025")
+    # 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025, 2026
+    st.markdown("## 📊 COMPORTAMIENTO DE LAS VENTAS POR MESES POR EMPRESA – 2023, 2024, 2025, 2026")
     colores_barras = {2023: '#FFD700', 2024: '#FFFFFF', 2025: '#00BFFF'}
 
     for empresa_actual in ['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA']:
         st.markdown(f"### 🏢 {empresa_actual}")
-        df_empresa = df_base[(df_base['EMPRESA'] == empresa_actual) & (df_base['AÑO'].isin([2023, 2024, 2025]))]
+        df_empresa = df_base[(df_base['EMPRESA'] == empresa_actual) & (df_base['AÑO'].isin([2023, 2024, 2025, 2026]))]
         resumen = df_empresa.groupby(['AÑO', 'MES'])['TOTAL'].sum().reset_index()
         if not resumen.empty:
             orden_meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
             resumen['MES'] = pd.Categorical(resumen['MES'], categories=orden_meses, ordered=True)
             resumen = resumen.sort_values(['AÑO', 'MES'])
             fig_empresa = go.Figure()
-            for año_g in [2023, 2024, 2025]:
+            for año_g in [2023, 2024, 2025, 2026]:
                 datos_año = resumen[resumen['AÑO'] == año_g]
                 fig_empresa.add_trace(go.Bar(
                     x=datos_año['MES'], y=datos_año['TOTAL'],
@@ -454,7 +455,7 @@ with st.container():
 # 🎛️ Filtro de año (aplica a ambos rankings)
             año_ranking = st.selectbox(
     "📆 Selecciona el año para ver el Top 15 clientes:",
-            [2023, 2024, 2025],
+            [2023, 2024, 2025, 2026],
             index=0
 )
 
