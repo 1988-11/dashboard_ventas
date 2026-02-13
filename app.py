@@ -241,7 +241,7 @@ with st.container():
     # 🧱 Base segura para gráficos: si no hay datos filtrados, usar el dataset completo
     df_base = df_filtrado if len(df_filtrado) > 0 else df
 
-    # 📋 Ventas Totales por Año – Comparativo Elegante
+    # 📋 Ventas Totales por Año – 2 Mercados (Lima y Provincias)
     st.markdown("## 📋 Ventas Totales por Año – Comparativo Elegante")
     ventas_tabla = df_base[df_base['AÑO'].isin([2023, 2024, 2025, 2026])].groupby(['EMPRESA', 'AÑO'])['TOTAL'].sum().reset_index()
 
