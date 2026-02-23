@@ -738,7 +738,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
                 df_group['AÑO'] = df_group['AÑO'].astype(int).astype(str)
             
-       if agrupar_real != "NINGUNO":
+            if agrupar_real != "NINGUNO":
      # Gráfico de barras agrupado profesional - VERSIÓN MEJORADA
                 fig_prof = px.bar(
                     df_group, 
