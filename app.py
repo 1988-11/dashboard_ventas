@@ -738,8 +738,8 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
                 df_group['AÑO'] = df_group['AÑO'].astype(int).astype(str)
             
-            if agrupar_real != "NINGUNO":
-                # Gráfico de barras agrupado profesional
+                        if agrupar_real != "NINGUNO":
+                # Gráfico de barras agrupado profesional - VERSIÓN MEJORADA
                 fig_prof = px.bar(
                     df_group, 
                     x=eje_x_real, 
@@ -757,13 +757,13 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                     template='plotly_white'
                 )
                 
-                # Personalización profesional
+                # Personalización profesional MEJORADA
                 fig_prof.update_traces(
                     textposition='outside',
-                    textfont=dict(size=11, family='Segoe UI'),
+                    textfont=dict(size=12, family='Arial Black', color='black'),  # 🔥 NEGRO Y NEGRITA
                     marker_line_width=1.5,
-                    marker_line_color='white',
-                    texttemplate='%{text:,.0f}'  # 🔥 MEJORA: Formato con comas
+                    marker_line_color='black',
+                    texttemplate='%{text:,.0f}'
                 )
                 
                 # Tabla pivote
@@ -774,7 +774,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 ).fillna(0)
                 
             else:
-                # Gráfico de barras simple profesional
+                # Gráfico de barras simple profesional - VERSIÓN MEJORADA
                 fig_prof = px.bar(
                     df_group, 
                     x=eje_x_real, 
@@ -787,37 +787,85 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 )
                 fig_prof.update_traces(
                     textposition='outside',
-                    textfont=dict(size=11, family='Segoe UI', color='white'),
+                    textfont=dict(size=12, family='Arial Black', color='white'),  # 🔥 BLANCO NEGRITA
                     marker_line_width=1.5,
                     marker_line_color='white',
                     marker_color='#003366',
-                    texttemplate='%{text:,.0f}'  # 🔥 MEJORA: Formato con comas
+                    texttemplate='%{text:,.0f}'
                 )
                 tabla_pivot = df_group.set_index(eje_x_real)
             
-            # 🔥 MEJORA 2: Rotar etiquetas para mejor legibilidad
+            # 🔥 MEJORA DE EJES - MÁS NÍTIDOS
             fig_prof.update_xaxes(
                 tickangle=-45 if len(df_group[eje_x_real].unique()) > 5 else 0,
-                tickfont=dict(size=12 if len(df_group[eje_x_real].unique()) <= 8 else 10)
+                tickfont=dict(
+                    size=14,  # 🔥 MÁS GRANDE
+                    family='Arial Black',  # 🔥 NEGRITA
+                    color='black',  # 🔥 NEGRO (mejor contraste)
+                    weight='bold'  # 🔥 NEGRITA
+                ),
+                title_font=dict(
+                    size=16,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2
+            )
+            
+            fig_prof.update_yaxes(
+                tickfont=dict(
+                    size=14,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=16,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2,
+                tickformat=',.0f'
             )
             
             # Mejoras de diseño profesional
             fig_prof.update_layout(
                 xaxis_title=eje_x_real.title(),
                 yaxis_title=titulo_metrica,
-                plot_bgcolor='rgba(0,0,0,0.02)',
-                paper_bgcolor='white',
-                font=dict(family='Segoe UI', size=14),
+                plot_bgcolor='white',  # 🔥 FONDO BLANCO
+                paper_bgcolor='white',  # 🔥 FONDO BLANCO
+                font=dict(
+                    family='Arial Black', 
+                    size=16, 
+                    color='black',  # 🔥 TEXTO NEGRO
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=20,
+                    family='Arial Black',
+                    color='#003366',
+                    weight='bold'
+                ),
                 legend=dict(
-                    title=agrupar_real.title() if agrupar_real != "NINGUNO" else "",
+                    title=dict(
+                        text=agrupar_real.title() if agrupar_real != "NINGUNO" else "",
+                        font=dict(size=14, family='Arial Black', color='black', weight='bold')
+                    ),
+                    font=dict(size=12, family='Arial', color='black'),
                     orientation='h',
                     yanchor='bottom',
                     y=1.02,
                     xanchor='right',
                     x=1
                 ),
-                height=550,
-                margin=dict(l=60, r=60, t=100, b=100),  # 🔥 MEJORA: Más espacio inferior
+                height=600,
+                margin=dict(l=80, r=60, t=120, b=100),
                 hovermode='x unified'
             )
             
@@ -963,9 +1011,9 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 )
             
             # GRÁFICO 1: Top Distritos por Ventas
+            # GRÁFICO 1: Top Distritos por Ventas - VERSIÓN MEJORADA
             st.markdown("#### 🏆 TOP DISTRITOS POR VENTAS")
             
-            # 🔥 MEJORA 5: Formato de texto con comas
             fig_dist1 = px.bar(
                 distritos_resumen.head(10),
                 x='VENTAS_TOTALES',
@@ -981,26 +1029,80 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             
             fig_dist1.update_traces(
                 textposition='inside',
-                textfont=dict(size=12, color='white', family='Segoe UI'),
-                marker_line_width=1,
-                marker_line_color='white'
+                textfont=dict(
+                    size=13, 
+                    family='Arial Black', 
+                    color='white',
+                    weight='bold'
+                ),
+                marker_line_width=1.5,
+                marker_line_color='black'
+            )
+            
+            # 🔥 EJES MÁS NÍTIDOS
+            fig_dist1.update_xaxes(
+                tickfont=dict(
+                    size=13,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=15,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2,
+                tickformat=',.0f'
+            )
+            
+            fig_dist1.update_yaxes(
+                tickfont=dict(
+                    size=13,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=15,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2
             )
             
             fig_dist1.update_layout(
-                height=500,
+                height=550,
                 xaxis_title="Ventas Totales (S/)",
                 yaxis_title="",
-                plot_bgcolor='rgba(0,0,0,0.02)',
-                paper_bgcolor='white',
-                font=dict(family='Segoe UI', size=12),
+                plot_bgcolor='white',  # 🔥 FONDO BLANCO
+                paper_bgcolor='white',  # 🔥 FONDO BLANCO
+                font=dict(
+                    family='Arial Black', 
+                    size=14, 
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=18,
+                    family='Arial Black',
+                    color='#003366',
+                    weight='bold'
+                ),
                 coloraxis_showscale=False,
-                margin=dict(l=150, r=20, t=50, b=50),
-                xaxis=dict(tickformat=',.0f')  # 🔥 MEJORA: Formato de eje X con comas
+                margin=dict(l=180, r=30, t=60, b=60)
             )
             
             st.plotly_chart(fig_dist1, use_container_width=True, key="fig_distritos_ventas")
             
             # GRÁFICO 2: Comparativo Ticket Promedio vs Operaciones
+            # GRÁFICO 2: Comparativo Ticket Promedio vs Operaciones - VERSIÓN MEJORADA
             st.markdown("#### 📈 ANÁLISIS DE RENDIMIENTO POR DISTRITO")
             
             fig_dist2 = px.scatter(
@@ -1020,18 +1122,80 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 size_max=50
             )
             
+            fig_dist2.update_traces(
+                marker=dict(
+                    line=dict(width=2, color='black')
+                )
+            )
+            
+            # 🔥 EJES MÁS NÍTIDOS
+            fig_dist2.update_xaxes(
+                tickfont=dict(
+                    size=13,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=15,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2,
+                tickformat=',.0f'
+            )
+            
+            fig_dist2.update_yaxes(
+                tickfont=dict(
+                    size=13,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                title_font=dict(
+                    size=15,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                gridcolor='lightgray',
+                linecolor='black',
+                linewidth=2,
+                tickprefix='S/ ',
+                tickformat=',.0f'
+            )
+            
             fig_dist2.update_layout(
-                height=500,
-                plot_bgcolor='rgba(0,0,0,0.02)',
-                paper_bgcolor='white',
-                font=dict(family='Segoe UI', size=12),
-                xaxis=dict(tickformat=',.0f'),  # 🔥 MEJORA: Formato con comas
-                yaxis=dict(tickprefix='S/ ', tickformat=',.0f')  # 🔥 MEJORA: Formato con comas
+                height=550,
+                plot_bgcolor='white',  # 🔥 FONDO BLANCO
+                paper_bgcolor='white',  # 🔥 FONDO BLANCO
+                font=dict(
+                    family='Arial', 
+                    size=13, 
+                    color='black'
+                ),
+                title_font=dict(
+                    size=18,
+                    family='Arial Black',
+                    color='#003366',
+                    weight='bold'
+                ),
+                legend=dict(
+                    font=dict(size=12, family='Arial', color='black'),
+                    title=dict(
+                        text="Provincia",
+                        font=dict(size=13, family='Arial Black', color='black', weight='bold')
+                    )
+                ),
+                margin=dict(l=80, r=50, t=80, b=60)
             )
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
-            
-            # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+
+        # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
             if len(años_dist) > 1:
                 st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
                 
@@ -1039,7 +1203,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))]
                 heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
                 
-                # 🔥 MEJORA 6: Convertir años a string para evitar decimales
+                # Convertir años a string para evitar decimales
                 heat_data['AÑO'] = heat_data['AÑO'].astype(int).astype(str)
                 heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
                 
@@ -1052,17 +1216,67 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                     labels=dict(x="Año", y="Distrito", color="Ventas (S/)")
                 )
                 
-                fig_heat.update_layout(
-                    height=500,
-                    plot_bgcolor='white',
-                    paper_bgcolor='white',
-                    font=dict(family='Segoe UI', size=12)
-                )
-                
-                # 🔥 MEJORA: Formato de texto en heatmap
+                # 🔥 MEJORA: Texto más nítido en heatmap
                 fig_heat.update_traces(
                     texttemplate='%{z:,.0f}',
-                    textfont=dict(size=10)
+                    textfont=dict(
+                        size=11,
+                        family='Arial Black',
+                        color='black',
+                        weight='bold'
+                    )
+                )
+                
+                fig_heat.update_xaxes(
+                    tickfont=dict(
+                        size=13,
+                        family='Arial Black',
+                        color='black',
+                        weight='bold'
+                    ),
+                    title_font=dict(
+                        size=15,
+                        family='Arial Black',
+                        color='black',
+                        weight='bold'
+                    )
+                )
+                
+                fig_heat.update_yaxes(
+                    tickfont=dict(
+                        size=12,
+                        family='Arial Black',
+                        color='black',
+                        weight='bold'
+                    ),
+                    title_font=dict(
+                        size=15,
+                        family='Arial Black',
+                        color='black',
+                        weight='bold'
+                    )
+                )
+                
+                fig_heat.update_layout(
+                    height=550,
+                    plot_bgcolor='white',
+                    paper_bgcolor='white',
+                    font=dict(family='Arial', size=13, color='black'),
+                    title_font=dict(
+                        size=18,
+                        family='Arial Black',
+                        color='#003366',
+                        weight='bold'
+                    ),
+                    coloraxis_colorbar=dict(
+                        title=dict(
+                            text="Ventas (S/)",
+                            font=dict(size=13, family='Arial Black', color='black', weight='bold')
+                        ),
+                        tickfont=dict(size=12, family='Arial', color='black'),
+                        tickformat=',.0f'
+                    ),
+                    margin=dict(l=120, r=30, t=80, b=60)
                 )
                 
                 st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
