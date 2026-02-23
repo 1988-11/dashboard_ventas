@@ -1195,7 +1195,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
 
-                     # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+          # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
             if len(años_dist) > 1:
                 st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
                 
@@ -1203,108 +1203,80 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))]
                 heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
                 
-                # 🔥 CORRECCIÓN 1: Forzar años a enteros
+                # 🔥 Forzar años a enteros
                 heat_data['AÑO'] = heat_data['AÑO'].astype(float).round(0).astype(int)
                 
                 # Crear pivot table
                 heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
                 
-                # 🔥 CORRECCIÓN 2: Ordenar años cronológicamente
+                # Ordenar años cronológicamente
                 años_ordenados = sorted(heat_pivot.columns)
                 heat_pivot = heat_pivot[años_ordenados]
                 
-                # Crear heatmap
-                fig_heat = px.imshow(
-                    heat_pivot,
-                    text_auto=True,
-                    aspect="auto",
-                    color_continuous_scale='Viridis',
-                    title="<b>Evolución de Ventas por Distrito</b>",
-                    labels=dict(x="Año", y="Distrito", color="Ventas (S/)")
-                )
-                
-                # 🔥 CORRECCIÓN 3: Texto de las celdas en BLANCO
-                fig_heat.update_traces(
-                    texttemplate='%{z:,.0f}',
-                    textfont=dict(
-                        size=11,
-                        family='Arial',
-                        color='white',  # Texto blanco en celdas
-                        weight='bold'
-                    )
-                )
-                
-                # 🔥 CORRECCIÓN 4: Eje X - AÑOS EN NEGRO Y VISIBLES
-                fig_heat.update_xaxes(
-                    tickfont=dict(
-                        size=14,
-                        family='Arial Black',
-                        color='black',  # 🔥 NEGRO para que se vea
-                        weight='bold'
-                    ),
-                    title_font=dict(
-                        size=16,
-                        family='Arial Black',
-                        color='black',
-                        weight='bold'
-                    ),
-                    tickangle=0,
-                    tickmode='array',
-                    tickvals=list(range(len(heat_pivot.columns))),
-                    ticktext=[str(año) for año in heat_pivot.columns]  # Años como string
-                )
-                
-                # 🔥 CORRECCIÓN 5: Eje Y - DISTRITOS EN NEGRO
-                fig_heat.update_yaxes(
-                    tickfont=dict(
-                        size=11,
-                        family='Arial Black',
-                        color='black',  # 🔥 NEGRO
-                        weight='bold'
-                    ),
-                    title_font=dict(
-                        size=16,
-                        family='Arial Black',
-                        color='black',
-                        weight='bold'
-                    ),
-                    tickmode='array',
-                    tickvals=list(range(len(heat_pivot.index))),
-                    ticktext=heat_pivot.index
-                )
-                
-                # 🔥 CORRECCIÓN 6: Layout con fondo blanco y texto negro
-                fig_heat.update_layout(
-                    height=600,
-                    plot_bgcolor='white',
-                    paper_bgcolor='white',
-                    font=dict(
-                        family='Arial', 
-                        size=12, 
-                        color='black'  # Texto general negro
-                    ),
-                    title_font=dict(
-                        size=18,
-                        family='Arial Black',
-                        color='#003366',  # Título azul corporativo
-                        weight='bold'
-                    ),
-                    coloraxis_colorbar=dict(
+                # 🔥 Crear heatmap con go.Heatmap (más control)
+                fig_heat = go.Figure(data=go.Heatmap(
+                    z=heat_pivot.values,
+                    x=[str(año) for año in heat_pivot.columns],  # Años como string en eje X
+                    y=heat_pivot.index,  # Distritos en eje Y
+                    colorscale='Viridis',
+                    text=heat_pivot.values,
+                    texttemplate='%{text:,.0f}',
+                    textfont=dict(size=11, family='Arial Black', color='white'),
+                    hoverongaps=False,
+                    colorbar=dict(
                         title=dict(
                             text="Ventas (S/)",
-                            font=dict(size=13, family='Arial Black', color='black', weight='bold')
+                            font=dict(size=13, family='Arial Black', color='black')
                         ),
                         tickfont=dict(size=12, family='Arial', color='black'),
                         tickformat=',.0f',
                         len=0.8,
-                        thickness=20,
-                        bgcolor='white'  # Fondo blanco para la barra
+                        thickness=20
+                    )
+                ))
+                
+                # 🔥 Personalizar layout - EJES VISIBLES
+                fig_heat.update_layout(
+                    title=dict(
+                        text="<b>Evolución de Ventas por Distrito</b>",
+                        font=dict(size=18, family='Arial Black', color='#003366')
                     ),
-                    margin=dict(l=180, r=50, t=80, b=60)
+                    height=600,
+                    plot_bgcolor='white',
+                    paper_bgcolor='white',
+                    font=dict(family='Arial', size=12, color='black'),
+                    xaxis=dict(
+                        title=dict(
+                            text="Año",
+                            font=dict(size=16, family='Arial Black', color='black', weight='bold')
+                        ),
+                        tickfont=dict(
+                            size=14,
+                            family='Arial Black',
+                            color='black',  # 🔥 NEGRO VISIBLE
+                            weight='bold'
+                        ),
+                        tickangle=0,
+                        side='bottom'
+                    ),
+                    yaxis=dict(
+                        title=dict(
+                            text="Distrito",
+                            font=dict(size=16, family='Arial Black', color='black', weight='bold')
+                        ),
+                        tickfont=dict(
+                            size=11,
+                            family='Arial Black',
+                            color='black',  # 🔥 NEGRO VISIBLE
+                            weight='bold'
+                        ),
+                        automargin=True
+                    ),
+                    margin=dict(l=180, r=50, t=80, b=80)
                 )
                 
                 st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
-            
+                
             # 🔥 MEJORA 7: TABLA DETALLADA CON COMAS DE MILLARES
             st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
             
