@@ -518,9 +518,9 @@ with st.container():
 # =============================================================================
 # 🆕 NUEVA SECCIÓN 1: COMPARADOR AVANZADO (SOLO PARA ADMIN)
 # =============================================================================
-if vendedor_actual == "ALL":  # Solo visible para ADMIN
+if vendedor_actual == "ALL":  # Solo visible para admin
     st.markdown("---")
-    st.markdown("## 🎯 COMPARADOR AVANZADO (ADMIN)")
+    st.markdown("## 🎯 COMPARADOR AVANZADO (admin)")
     st.markdown("### Personaliza tu comparación y visualiza los resultados")
     
     # Crear pestañas dentro del comparador
