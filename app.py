@@ -515,13 +515,14 @@ with st.container():
     totales_empresas = df_base[df_base['AÑO'] == año_ranking].groupby('EMPRESA')['TOTAL'].sum().reset_index()
     totales_empresas['TOTAL'] = totales_empresas['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
     st.dataframe(totales_empresas.rename(columns={"EMPRESA": "Empresa", "TOTAL": "Ventas Totales"}))
-
 # =============================================================================
 # 🆕 NUEVA SECCIÓN 1: COMPARADOR AVANZADO PROFESIONAL (SOLO PARA ADMIN)
 # =============================================================================
-if vendedor_actual == "ALL":  # Solo visible para admin
+import io  # Asegúrate de tener esto al inicio del archivo
+
+if vendedor_actual == "ALL":  # Solo visible para ADMIN
     st.markdown("---")
-    st.markdown("## 🎯 COMPARADOR AVANZADO PROFESIONAL (admin)")
+    st.markdown("## 🎯 COMPARADOR AVANZADO PROFESIONAL")
     st.markdown("### Análisis comparativo con visualizaciones profesionales")
     
     # Estilo profesional para el comparador
@@ -724,12 +725,18 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             with col_m4:
                 st.markdown('<div class="metric-card">', unsafe_allow_html=True)
                 num_clientes = df_prof['CLIENTE'].nunique()
-                st.metric("👥 Clientes Únicos", f"{num_clientes}")
+                st.metric("👥 Clientes Únicos", f"{num_clientes:,}")
                 st.markdown('</div>', unsafe_allow_html=True)
         
-        # GRÁFICO PROFESIONAL
+        # GRÁFICO PROFESIONAL CON EJES LEGIBLES
         if not df_group.empty:
             st.markdown("#### 📊 VISUALIZACIÓN PROFESIONAL")
+            
+            # 🔥 MEJORA 1: Convertir años a string para evitar decimales
+            if eje_x_real == 'AÑO':
+                df_group['AÑO'] = df_group['AÑO'].astype(int).astype(str)
+            if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
+                df_group['AÑO'] = df_group['AÑO'].astype(int).astype(str)
             
             if agrupar_real != "NINGUNO":
                 # Gráfico de barras agrupado profesional
@@ -755,7 +762,8 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                     textposition='outside',
                     textfont=dict(size=11, family='Segoe UI'),
                     marker_line_width=1.5,
-                    marker_line_color='white'
+                    marker_line_color='white',
+                    texttemplate='%{text:,.0f}'  # 🔥 MEJORA: Formato con comas
                 )
                 
                 # Tabla pivote
@@ -782,9 +790,16 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                     textfont=dict(size=11, family='Segoe UI', color='white'),
                     marker_line_width=1.5,
                     marker_line_color='white',
-                    marker_color='#003366'
+                    marker_color='#003366',
+                    texttemplate='%{text:,.0f}'  # 🔥 MEJORA: Formato con comas
                 )
                 tabla_pivot = df_group.set_index(eje_x_real)
+            
+            # 🔥 MEJORA 2: Rotar etiquetas para mejor legibilidad
+            fig_prof.update_xaxes(
+                tickangle=-45 if len(df_group[eje_x_real].unique()) > 5 else 0,
+                tickfont=dict(size=12 if len(df_group[eje_x_real].unique()) <= 8 else 10)
+            )
             
             # Mejoras de diseño profesional
             fig_prof.update_layout(
@@ -802,12 +817,9 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                     x=1
                 ),
                 height=550,
-                margin=dict(l=60, r=60, t=100, b=60),
+                margin=dict(l=60, r=60, t=100, b=100),  # 🔥 MEJORA: Más espacio inferior
                 hovermode='x unified'
             )
-            
-            # Mejorar ejes
-            fig_prof.update_xaxes(tickangle=-45 if len(df_group[eje_x_real].unique()) > 5 else 0)
             
             # Mostrar gráfico
             st.plotly_chart(fig_prof, use_container_width=True, key="prof_grafico_general")
@@ -815,7 +827,7 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             # TABLA PROFESIONAL
             st.markdown("#### 📋 TABLA COMPARATIVA DETALLADA")
             
-            # Formatear tabla
+            # 🔥 MEJORA 3: Formato con comas de millares
             tabla_formateada = tabla_pivot.copy()
             for col in tabla_formateada.columns:
                 if metrica == "💰 Ventas Totales" or metrica == "🎯 Ticket Promedio":
@@ -859,7 +871,7 @@ if vendedor_actual == "ALL":  # Solo visible para admin
         st.markdown('</div>', unsafe_allow_html=True)
     
     # ==============================================
-    # PESTAÑA 2: COMPARADOR POR DISTRITOS (NUEVO)
+    # PESTAÑA 2: COMPARADOR POR DISTRITOS (MEJORADO)
     # ==============================================
     with tab_comp2:
         st.markdown('<div class="comparador-card">', unsafe_allow_html=True)
@@ -918,14 +930,14 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             distritos_resumen = distritos_resumen.reset_index()
             distritos_resumen = distritos_resumen.sort_values('VENTAS_TOTALES', ascending=False).head(top_n)
             
-            # Métricas generales
+            # 🔥 MEJORA 4: Métricas con comas de millares
             st.markdown("#### 📊 MÉTRICAS GLOBALES DE DISTRITOS")
             col_md1, col_md2, col_md3, col_md4 = st.columns(4)
             
             with col_md1:
                 st.metric(
                     "🏙️ Distritos Atendidos",
-                    f"{len(distritos_resumen)}",
+                    f"{len(distritos_resumen):,}",
                     help="Número de distritos en el top"
                 )
             
@@ -953,6 +965,7 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             # GRÁFICO 1: Top Distritos por Ventas
             st.markdown("#### 🏆 TOP DISTRITOS POR VENTAS")
             
+            # 🔥 MEJORA 5: Formato de texto con comas
             fig_dist1 = px.bar(
                 distritos_resumen.head(10),
                 x='VENTAS_TOTALES',
@@ -981,7 +994,8 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                 paper_bgcolor='white',
                 font=dict(family='Segoe UI', size=12),
                 coloraxis_showscale=False,
-                margin=dict(l=150, r=20, t=50, b=50)
+                margin=dict(l=150, r=20, t=50, b=50),
+                xaxis=dict(tickformat=',.0f')  # 🔥 MEJORA: Formato de eje X con comas
             )
             
             st.plotly_chart(fig_dist1, use_container_width=True, key="fig_distritos_ventas")
@@ -1010,7 +1024,9 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                 height=500,
                 plot_bgcolor='rgba(0,0,0,0.02)',
                 paper_bgcolor='white',
-                font=dict(family='Segoe UI', size=12)
+                font=dict(family='Segoe UI', size=12),
+                xaxis=dict(tickformat=',.0f'),  # 🔥 MEJORA: Formato con comas
+                yaxis=dict(tickprefix='S/ ', tickformat=',.0f')  # 🔥 MEJORA: Formato con comas
             )
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
@@ -1022,6 +1038,9 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                 # Preparar datos para heatmap
                 distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))]
                 heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
+                
+                # 🔥 MEJORA 6: Convertir años a string para evitar decimales
+                heat_data['AÑO'] = heat_data['AÑO'].astype(int).astype(str)
                 heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
                 
                 fig_heat = px.imshow(
@@ -1029,7 +1048,7 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                     text_auto='.0f',
                     aspect="auto",
                     color_continuous_scale='Viridis',
-                    title="<b>Evolución de Ventas por Distrito (2023-2026)</b>",
+                    title="<b>Evolución de Ventas por Distrito</b>",
                     labels=dict(x="Año", y="Distrito", color="Ventas (S/)")
                 )
                 
@@ -1040,15 +1059,23 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                     font=dict(family='Segoe UI', size=12)
                 )
                 
+                # 🔥 MEJORA: Formato de texto en heatmap
+                fig_heat.update_traces(
+                    texttemplate='%{z:,.0f}',
+                    textfont=dict(size=10)
+                )
+                
                 st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
             
-            # TABLA DETALLADA
+            # 🔥 MEJORA 7: TABLA DETALLADA CON COMAS DE MILLARES
             st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
             
-            # Formatear tabla
+            # Formatear tabla con comas
             distritos_show = distritos_resumen.copy()
             distritos_show['VENTAS_TOTALES'] = distritos_show['VENTAS_TOTALES'].apply(lambda x: f"S/ {x:,.2f}")
             distritos_show['TICKET_PROMEDIO'] = distritos_show['TICKET_PROMEDIO'].apply(lambda x: f"S/ {x:,.2f}")
+            distritos_show['OPERACIONES'] = distritos_show['OPERACIONES'].apply(lambda x: f"{x:,.0f}")
+            distritos_show['CLIENTES_UNICOS'] = distritos_show['CLIENTES_UNICOS'].apply(lambda x: f"{x:,.0f}")
             
             st.dataframe(
                 distritos_show,
@@ -1068,7 +1095,9 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             col_exp_dist1, col_exp_dist2 = st.columns(2)
             
             with col_exp_dist1:
-                csv_dist = distritos_resumen.to_csv(index=False).encode('utf-8')
+                # 🔥 MEJORA: Exportar con números sin formato
+                distritos_export = distritos_resumen.copy()
+                csv_dist = distritos_export.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 EXPORTAR ANÁLISIS DE DISTRITOS (CSV)",
                     data=csv_dist,
@@ -1080,9 +1109,11 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             
             with col_exp_dist2:
                 # Detalle de clientes por distrito
+                clientes_dist = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'])][['DISTRITO', 'CLIENTE', 'TOTAL']].copy()
+                csv_clientes = clientes_dist.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 EXPORTAR CLIENTES POR DISTRITO (CSV)",
-                    data=df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'])][['DISTRITO', 'CLIENTE', 'TOTAL']].to_csv(index=False).encode('utf-8'),
+                    data=csv_clientes,
                     file_name=f"clientes_por_distrito.csv",
                     mime="text/csv",
                     key="btn_dist_clientes",
@@ -1147,7 +1178,6 @@ if vendedor_actual == "ALL":  # Solo visible para admin
             st.warning("⚠️ No hay datos para mostrar. Aplica filtros en la pestaña 'Comparador General' primero.")
         
         st.markdown('</div>', unsafe_allow_html=True)
-
    
 # ✍️ Línea de autoría
 st.markdown("---")
