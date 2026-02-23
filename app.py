@@ -1195,7 +1195,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
 
-          # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+                      # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
             if len(años_dist) > 1:
                 st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
                 
@@ -1203,8 +1203,17 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))]
                 heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
                 
-                # 🔥 Forzar años a enteros
-                heat_data['AÑO'] = heat_data['AÑO'].astype(float).round(0).astype(int)
+                # 🔥 CORRECCIÓN 1: Redondear años al entero más cercano y filtrar solo enteros puros
+                heat_data['AÑO_ENTERO'] = heat_data['AÑO'].astype(float).round(0).astype(int)
+                
+                # 🔥 CORRECCIÓN 2: Verificar que el año original esté cerca del entero (evitar 2023.5)
+                heat_data = heat_data[abs(heat_data['AÑO'] - heat_data['AÑO_ENTERO']) < 0.1]
+                
+                # Usar el año entero para todo
+                heat_data['AÑO'] = heat_data['AÑO_ENTERO']
+                
+                # 🔥 CORRECCIÓN 3: Eliminar duplicados por si acaso
+                heat_data = heat_data.drop_duplicates(subset=['DISTRITO', 'AÑO'])
                 
                 # Crear pivot table
                 heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
@@ -1213,11 +1222,15 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 años_ordenados = sorted(heat_pivot.columns)
                 heat_pivot = heat_pivot[años_ordenados]
                 
-                # 🔥 Crear heatmap con go.Heatmap (más control)
+                # 🔥 CORRECCIÓN 4: Si hay años .5 en las columnas, filtrarlos
+                años_filtrados = [a for a in heat_pivot.columns if a in [2023, 2024, 2025, 2026]]
+                heat_pivot = heat_pivot[años_filtrados] if años_filtrados else heat_pivot
+                
+                # Crear heatmap con go.Heatmap
                 fig_heat = go.Figure(data=go.Heatmap(
                     z=heat_pivot.values,
-                    x=[str(año) for año in heat_pivot.columns],  # Años como string en eje X
-                    y=heat_pivot.index,  # Distritos en eje Y
+                    x=[str(int(año)) for año in heat_pivot.columns],  # 🔥 Años como enteros string
+                    y=heat_pivot.index,
                     colorscale='Viridis',
                     text=heat_pivot.values,
                     texttemplate='%{text:,.0f}',
@@ -1235,7 +1248,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                     )
                 ))
                 
-                # 🔥 Personalizar layout - EJES VISIBLES
+                # Personalizar layout
                 fig_heat.update_layout(
                     title=dict(
                         text="<b>Evolución de Ventas por Distrito</b>",
@@ -1253,7 +1266,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                         tickfont=dict(
                             size=14,
                             family='Arial Black',
-                            color='black',  # 🔥 NEGRO VISIBLE
+                            color='black',
                             weight='bold'
                         ),
                         tickangle=0,
@@ -1267,7 +1280,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                         tickfont=dict(
                             size=11,
                             family='Arial Black',
-                            color='black',  # 🔥 NEGRO VISIBLE
+                            color='black',
                             weight='bold'
                         ),
                         automargin=True
