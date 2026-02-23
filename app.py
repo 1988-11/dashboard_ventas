@@ -1195,30 +1195,30 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
 
-         # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
-         if len(años_dist) > 1:
-           st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
+                 # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+            if len(años_dist) > 1:
+                st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
     
-          # Preparar datos para heatmap
-          distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))].copy()
+            # Preparar datos para heatmap
+            distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))].copy()
     
-         # 🔥 CORRECCIÓN 1: Forzar años a numérico y redondear
-         distritos_heat['AÑO'] = pd.to_numeric(distritos_heat['AÑO'], errors='coerce')
+            # 🔥 CORRECCIÓN 1: Forzar años a numérico y redondear
+            distritos_heat['AÑO'] = pd.to_numeric(distritos_heat['AÑO'], errors='coerce')
     
-        # 🔥 CORRECCIÓN 2: Crear columna de año entero
-         distritos_heat['AÑO_ENTERO'] = distritos_heat['AÑO'].round(0).astype(int)
+            # 🔥 CORRECCIÓN 2: Crear columna de año entero
+            distritos_heat['AÑO_ENTERO'] = distritos_heat['AÑO'].round(0).astype(int)
     
-        # 🔥 CORRECCIÓN 3: Filtrar SOLO años que sean casi enteros (eliminar .5)
-         distritos_heat = distritos_heat[abs(distritos_heat['AÑO'] - distritos_heat['AÑO_ENTERO']) < 0.1]
+            # 🔥 CORRECCIÓN 3: Filtrar SOLO años que sean casi enteros (eliminar .5)
+            distritos_heat = distritos_heat[abs(distritos_heat['AÑO'] - distritos_heat['AÑO_ENTERO']) < 0.1]
     
-       # 🔥 CORRECCIÓN 4: Reemplazar AÑO por el entero
-       distritos_heat['AÑO'] = distritos_heat['AÑO_ENTERO']
+            # 🔥 CORRECCIÓN 4: Reemplazar AÑO por el entero
+            distritos_heat['AÑO'] = distritos_heat['AÑO_ENTERO']
     
-       # 🔥 CORRECCIÓN 5: Filtrar SOLO los años que queremos (2023-2026)
-      distritos_heat = distritos_heat[distritos_heat['AÑO'].isin([2023, 2024, 2025, 2026])]
+            # 🔥 CORRECCIÓN 5: Filtrar SOLO los años que queremos (2023-2026)
+            distritos_heat = distritos_heat[distritos_heat['AÑO'].isin([2023, 2024, 2025, 2026])]
     
-      # Agrupar por DISTRITO y AÑO
-      heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
+            # Agrupar por DISTRITO y AÑO
+            heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
     
     if heat_data.empty:
         st.warning("⚠️ No hay datos de años enteros para mostrar el heatmap")
