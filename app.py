@@ -1195,7 +1195,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
 
-                 # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+                       # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
             if len(años_dist) > 1:
                 st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
     
@@ -1294,17 +1294,17 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
         
         st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
                 
-            # 🔥 MEJORA 7: TABLA DETALLADA CON COMAS DE MILLARES
-            st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
+        # 🔥 MEJORA 7: TABLA DETALLADA CON COMAS DE MILLARES
+        st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
             
             # Formatear tabla con comas
-            distritos_show = distritos_resumen.copy()
-            distritos_show['VENTAS_TOTALES'] = distritos_show['VENTAS_TOTALES'].apply(lambda x: f"S/ {x:,.2f}")
-            distritos_show['TICKET_PROMEDIO'] = distritos_show['TICKET_PROMEDIO'].apply(lambda x: f"S/ {x:,.2f}")
-            distritos_show['OPERACIONES'] = distritos_show['OPERACIONES'].apply(lambda x: f"{x:,.0f}")
-            distritos_show['CLIENTES_UNICOS'] = distritos_show['CLIENTES_UNICOS'].apply(lambda x: f"{x:,.0f}")
+        distritos_show = distritos_resumen.copy()
+        distritos_show['VENTAS_TOTALES'] = distritos_show['VENTAS_TOTALES'].apply(lambda x: f"S/ {x:,.2f}")
+        distritos_show['TICKET_PROMEDIO'] = distritos_show['TICKET_PROMEDIO'].apply(lambda x: f"S/ {x:,.2f}")
+        distritos_show['OPERACIONES'] = distritos_show['OPERACIONES'].apply(lambda x: f"{x:,.0f}")
+        distritos_show['CLIENTES_UNICOS'] = distritos_show['CLIENTES_UNICOS'].apply(lambda x: f"{x:,.0f}")
             
-            st.dataframe(
+        st.dataframe(
                 distritos_show,
                 use_container_width=True,
                 height=400,
@@ -1318,10 +1318,10 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 }
             )
             
-            # Exportar datos de distritos
-            col_exp_dist1, col_exp_dist2 = st.columns(2)
+        # Exportar datos de distritos
+        col_exp_dist1, col_exp_dist2 = st.columns(2)
             
-            with col_exp_dist1:
+        with col_exp_dist1:
                 # 🔥 MEJORA: Exportar con números sin formato
                 distritos_export = distritos_resumen.copy()
                 csv_dist = distritos_export.to_csv(index=False).encode('utf-8')
@@ -1334,7 +1334,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                     use_container_width=True
                 )
             
-            with col_exp_dist2:
+        with col_exp_dist2:
                 # Detalle de clientes por distrito
                 clientes_dist = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'])][['DISTRITO', 'CLIENTE', 'TOTAL']].copy()
                 csv_clientes = clientes_dist.to_csv(index=False).encode('utf-8')
@@ -1405,7 +1405,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             st.warning("⚠️ No hay datos para mostrar. Aplica filtros en la pestaña 'Comparador General' primero.")
         
         st.markdown('</div>', unsafe_allow_html=True)
-   
+            
 # ✍️ Línea de autoría
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray;'>Aplicativo desarrollado por <b>Edward O.</b> © 2025</p>", unsafe_allow_html=True)
