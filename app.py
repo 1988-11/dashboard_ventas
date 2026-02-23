@@ -6,6 +6,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import unicodedata
+import io  # Para manejo de archivos en memoria
 
 st.markdown(
     """
