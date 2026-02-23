@@ -515,9 +515,452 @@ with st.container():
     totales_empresas['TOTAL'] = totales_empresas['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
     st.dataframe(totales_empresas.rename(columns={"EMPRESA": "Empresa", "TOTAL": "Ventas Totales"}))
 
+# =============================================================================
+# 🆕 NUEVA SECCIÓN 1: COMPARADOR AVANZADO (SOLO PARA ADMIN)
+# =============================================================================
+if vendedor_actual == "ALL":  # Solo visible para ADMIN
+    st.markdown("---")
+    st.markdown("## 🎯 COMPARADOR AVANZADO (ADMIN)")
+    st.markdown("### Personaliza tu comparación y visualiza los resultados")
+    
+    # Crear pestañas dentro del comparador
+    tab1, tab2 = st.tabs(["📊 Configurar Comparación", "📋 Ver Datos Detallados"])
+    
+    with tab1:
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**📌 Eje X (Categorías)**")
+            eje_x = st.selectbox(
+                "Selecciona qué quieres comparar:",
+                options=["PROVINCIA", "VENDEDOR", "AÑO", "MES", "EMPRESA"],
+                index=0,
+                key="comparador_eje_x"
+            )
+        
+        with col2:
+            st.markdown("**🎨 Agrupar por (Color)**")
+            agrupar_por = st.selectbox(
+                "Selecciona el grupo de comparación:",
+                options=["AÑO", "VENDEDOR", "PROVINCIA", "MES", "EMPRESA", "NINGUNO"],
+                index=0,
+                key="comparador_agrupar"
+            )
+        
+        with col3:
+            st.markdown("**📏 Métrica a visualizar**")
+            metrica = st.selectbox(
+                "Selecciona la métrica:",
+                options=["TOTAL (Suma de ventas)", "Cantidad de operaciones"],
+                index=0,
+                key="comparador_metrica"
+            )
+        
+        # Filtros adicionales para el comparador
+        st.markdown("#### 🔍 Filtros adicionales para la comparación")
+        col_f1, col_f2, col_f3 = st.columns(3)
+        
+        with col_f1:
+            años_disponibles = sorted(df_base['AÑO'].dropna().unique())
+            años_comp = st.multiselect(
+                "Años a incluir:",
+                options=años_disponibles,
+                default=años_disponibles,
+                key="filtro_años_comparador"
+            )
+        
+        with col_f2:
+            empresas_comp = st.multiselect(
+                "Empresas:",
+                options=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
+                default=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
+                key="filtro_empresas_comparador"
+            )
+        
+        with col_f3:
+            if eje_x != "VENDEDOR" and agrupar_por != "VENDEDOR":
+                vendedores_comp = st.multiselect(
+                    "Vendedores:",
+                    options=sorted(df_base['VENDEDOR'].unique()),
+                    default=[],
+                    key="filtro_vendedores_comparador"
+                )
+            else:
+                vendedores_comp = []
+                st.info("ℹ️ Vendedor ya está en ejes/grupos")
+        
+        # Aplicar filtros
+        df_comp = df_base.copy()
+        if años_comp:
+            df_comp = df_comp[df_comp['AÑO'].isin(años_comp)]
+        if empresas_comp:
+            df_comp = df_comp[df_comp['EMPRESA'].isin(empresas_comp)]
+        if vendedores_comp:
+            df_comp = df_comp[df_comp['VENDEDOR'].isin(vendedores_comp)]
+        
+        # Preparar datos según métrica seleccionada
+        if metrica == "TOTAL (Suma de ventas)":
+            if agrupar_por != "NINGUNO":
+                df_group = df_comp.groupby([eje_x, agrupar_por], as_index=False)['TOTAL'].sum()
+            else:
+                df_group = df_comp.groupby([eje_x], as_index=False)['TOTAL'].sum()
+            titulo_metrica = "Ventas Totales (S/)"
+            formato = "S/ {:,.0f}"
+        else:  # Cantidad de operaciones
+            if agrupar_por != "NINGUNO":
+                df_group = df_comp.groupby([eje_x, agrupar_por], as_index=False).size().rename(columns={'size': 'CANTIDAD'})
+            else:
+                df_group = df_comp.groupby([eje_x], as_index=False).size().rename(columns={'size': 'CANTIDAD'})
+            titulo_metrica = "Número de Operaciones"
+            formato = "{:,.0f} ops"
+        
+        # Crear gráfico
+        if not df_group.empty:
+            if agrupar_por != "NINGUNO":
+                # Gráfico de barras agrupadas
+                fig_comp = px.bar(
+                    df_group, 
+                    x=eje_x, 
+                    y=df_group.columns[-1],  # La última columna es TOTAL o CANTIDAD
+                    color=agrupar_por,
+                    barmode='group',
+                    title=f"Comparación: {eje_x} por {agrupar_por}",
+                    labels={eje_x: eje_x.title(), df_group.columns[-1]: titulo_metrica, agrupar_por: agrupar_por.title()},
+                    text_auto=True,
+                    color_discrete_sequence=px.colors.qualitative.Bold
+                )
+                fig_comp.update_traces(textposition='outside', textfont=dict(size=11))
+                
+                # Crear tabla pivote
+                tabla_pivot = df_group.pivot(index=eje_x, columns=agrupar_por, values=df_group.columns[-1]).fillna(0)
+                
+            else:
+                # Gráfico de barras simple
+                fig_comp = px.bar(
+                    df_group, 
+                    x=eje_x, 
+                    y=df_group.columns[-1],
+                    title=f"Comparación por {eje_x}",
+                    labels={eje_x: eje_x.title(), df_group.columns[-1]: titulo_metrica},
+                    text_auto=True,
+                    color_discrete_sequence=['#3366CC']
+                )
+                fig_comp.update_traces(textposition='outside', textfont=dict(size=11))
+                tabla_pivot = df_group.set_index(eje_x)
+            
+            # Mejorar diseño del gráfico
+            fig_comp.update_layout(
+                xaxis_title=eje_x.title(),
+                yaxis_title=titulo_metrica,
+                plot_bgcolor='rgba(0,0,0,0.05)',
+                paper_bgcolor='white',
+                font=dict(family='Segoe UI', size=14),
+                legend_title=agrupar_por.title() if agrupar_por != "NINGUNO" else "",
+                height=600,
+                margin=dict(l=50, r=50, t=80, b=80)
+            )
+            
+            # Mostrar gráfico
+            st.plotly_chart(fig_comp, use_container_width=True, key="grafico_comparador")
+            
+            # Mostrar tabla resumen
+            st.markdown("#### 📊 Tabla comparativa")
+            
+            # Formatear tabla
+            tabla_formateada = tabla_pivot.copy()
+            for col in tabla_formateada.columns:
+                if metrica == "TOTAL (Suma de ventas)":
+                    tabla_formateada[col] = tabla_formateada[col].apply(lambda x: f"S/ {x:,.2f}")
+                else:
+                    tabla_formateada[col] = tabla_formateada[col].apply(lambda x: f"{x:,.0f}")
+            
+            st.dataframe(
+                tabla_formateada,
+                use_container_width=True,
+                height=400
+            )
+            
+            # Botón para exportar tabla
+            csv = tabla_pivot.to_csv().encode('utf-8')
+            st.download_button(
+                label="📥 Descargar tabla comparativa (CSV)",
+                data=csv,
+                file_name=f"comparacion_{eje_x}_vs_{agrupar_por}.csv",
+                mime="text/csv",
+                key="btn_descargar_comparador"
+            )
+        else:
+            st.warning("⚠️ No hay datos con los filtros seleccionados")
+    
+    with tab2:
+        st.markdown("### 📋 Datos detallados de la comparación")
+        
+        # Selector de nivel de detalle
+        nivel_detalle = st.radio(
+            "Nivel de detalle:",
+            ["Resumen por grupo", "Todos los registros"],
+            horizontal=True,
+            key="nivel_detalle_comparador"
+        )
+        
+        if nivel_detalle == "Resumen por grupo":
+            # Mostrar el dataframe agrupado
+            if 'df_group' in locals() and not df_group.empty:
+                df_show = df_group.copy()
+                if metrica == "TOTAL (Suma de ventas)":
+                    df_show['TOTAL'] = df_show['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
+                else:
+                    df_show['CANTIDAD'] = df_show['CANTIDAD'].apply(lambda x: f"{x:,.0f}")
+                st.dataframe(df_show, use_container_width=True)
+        else:
+            # Mostrar todos los registros filtrados
+            df_detalle = df_comp[['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']].copy()
+            df_detalle['TOTAL'] = df_detalle['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
+            st.dataframe(df_detalle, use_container_width=True, height=500)
+            
+            # Botón para exportar detalle
+            csv_detalle = df_comp.to_csv().encode('utf-8')
+            st.download_button(
+                label="📥 Exportar todos los registros filtrados (CSV)",
+                data=csv_detalle,
+                file_name="registros_filtrados.csv",
+                mime="text/csv",
+                key="btn_descargar_detalle"
+            )
+
+# =============================================================================
+# 🆕 NUEVA SECCIÓN 2: EXPORTACIÓN DE DATOS PARA TODOS LOS USUARIOS
+# =============================================================================
+st.markdown("---")
+st.markdown("## 📤 EXPORTACIÓN DE DATOS")
+
+# Crear pestañas para las diferentes exportaciones
+tab_exp1, tab_exp2, tab_exp3 = st.tabs(["📊 Mis Ventas", "👥 Mis Clientes", "⚙️ Exportación Avanzada"])
+
+with tab_exp1:
+    st.markdown("### 📊 Exportar mis ventas")
+    st.markdown(f"**Usuario actual:** {usuario} | **Vista:** {'Todos los vendedores' if vendedor_actual == 'ALL' else vendedor_actual}")
+    
+    # Filtros para la exportación
+    col_f1, col_f2 = st.columns(2)
+    
+    with col_f1:
+        año_export = st.selectbox(
+            "Seleccionar año:",
+            options=["Todos"] + [2023, 2024, 2025, 2026],
+            index=0,
+            key="año_export_ventas"
+        )
+    
+    with col_f2:
+        empresa_export = st.selectbox(
+            "Seleccionar empresa:",
+            options=["Todas", "INDUSTRIAS ELECTRICAS KBA", "TEAMWORK KBA"],
+            index=0,
+            key="empresa_export_ventas"
+        )
+    
+    # Aplicar filtros
+    df_export_ventas = df.copy()
+    
+    if año_export != "Todos":
+        df_export_ventas = df_export_ventas[df_export_ventas['AÑO'] == año_export]
+    
+    if empresa_export != "Todas":
+        df_export_ventas = df_export_ventas[df_export_ventas['EMPRESA'] == empresa_export]
+    
+    # Seleccionar columnas relevantes
+    columnas_ventas = ['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']
+    df_export_ventas = df_export_ventas[columnas_ventas].copy()
+    
+    # Mostrar preview
+    st.markdown(f"**📋 Vista previa ({len(df_export_ventas)} registros):**")
+    df_preview = df_export_ventas.head(10).copy()
+    df_preview['TOTAL'] = df_preview['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
+    st.dataframe(df_preview, use_container_width=True)
+    
+    if len(df_export_ventas) > 10:
+        st.caption(f"Mostrando 10 de {len(df_export_ventas)} registros")
+    
+    # Botón de exportación
+    if not df_export_ventas.empty:
+        # Crear archivo Excel
+        import io
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df_export_ventas.to_excel(writer, sheet_name='Ventas', index=False)
+            
+            # Formato para moneda
+            workbook = writer.book
+            worksheet = writer.sheets['Ventas']
+            money_format = workbook.add_format({'num_format': 'S/ #,##0.00'})
+            worksheet.set_column('G:G', 15, money_format)  # Columna TOTAL
+            
+            # Ajustar ancho de columnas
+            worksheet.set_column('A:A', 12)  # FECHA
+            worksheet.set_column('B:B', 15)  # VENDEDOR
+            worksheet.set_column('C:C', 25)  # EMPRESA
+            worksheet.set_column('D:D', 30)  # CLIENTE
+            worksheet.set_column('E:E', 15)  # PROVINCIA
+            worksheet.set_column('F:F', 15)  # DISTRITO
+            worksheet.set_column('H:H', 8)   # AÑO
+            worksheet.set_column('I:I', 8)   # MES
+        
+        st.download_button(
+            label="📥 DESCARGAR MIS VENTAS EN EXCEL",
+            data=output.getvalue(),
+            file_name=f"mis_ventas_{usuario}_{año_export}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="btn_export_ventas",
+            use_container_width=True
+        )
+    else:
+        st.warning("No hay ventas para exportar con los filtros seleccionados.")
+
+with tab_exp2:
+    st.markdown("### 👥 Exportar mis clientes")
+    st.markdown("Listado de clientes únicos con el total de ventas acumulado")
+    
+    # Filtros para clientes
+    col_c1, col_c2 = st.columns(2)
+    
+    with col_c1:
+        año_clientes = st.selectbox(
+            "Año para clientes:",
+            options=["Todos los años"] + [2023, 2024, 2025, 2026],
+            index=0,
+            key="año_export_clientes"
+        )
+    
+    with col_c2:
+        min_venta = st.number_input(
+            "Venta mínima (S/):",
+            min_value=0,
+            value=0,
+            step=100,
+            key="min_venta_clientes"
+        )
+    
+    # Filtrar datos
+    df_clientes = df.copy()
+    
+    if año_clientes != "Todos los años":
+        df_clientes = df_clientes[df_clientes['AÑO'] == año_clientes]
+    
+    # Agrupar por cliente
+    clientes_resumen = df_clientes.groupby(['CLIENTE', 'VENDEDOR', 'EMPRESA']).agg({
+        'TOTAL': 'sum',
+        'FECHA': 'count'
+    }).rename(columns={'FECHA': 'CANTIDAD_COMPRAS'}).reset_index()
+    
+    # Filtrar por venta mínima
+    clientes_resumen = clientes_resumen[clientes_resumen['TOTAL'] >= min_venta]
+    clientes_resumen = clientes_resumen.sort_values('TOTAL', ascending=False)
+    
+    # Calcular porcentaje
+    total_ventas = clientes_resumen['TOTAL'].sum()
+    clientes_resumen['% PARTICIPACIÓN'] = (clientes_resumen['TOTAL'] / total_ventas * 100).round(2)
+    
+    # Mostrar preview
+    st.markdown(f"**📋 Vista previa - Top 10 clientes ({len(clientes_resumen)} clientes en total):**")
+    df_clientes_preview = clientes_resumen.head(10).copy()
+    df_clientes_preview['TOTAL'] = df_clientes_preview['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
+    df_clientes_preview['% PARTICIPACIÓN'] = df_clientes_preview['% PARTICIPACIÓN'].apply(lambda x: f"{x}%")
+    st.dataframe(df_clientes_preview, use_container_width=True)
+    
+    # Botones de exportación
+    if not clientes_resumen.empty:
+        col_b1, col_b2 = st.columns(2)
+        
+        with col_b1:
+            # Exportar a Excel
+            output_clientes = io.BytesIO()
+            with pd.ExcelWriter(output_clientes, engine='xlsxwriter') as writer:
+                clientes_resumen.to_excel(writer, sheet_name='Clientes', index=False)
+                
+                workbook = writer.book
+                worksheet = writer.sheets['Clientes']
+                
+                # Formatos
+                money_format = workbook.add_format({'num_format': 'S/ #,##0.00'})
+                percent_format = workbook.add_format({'num_format': '0.00%'})
+                
+                worksheet.set_column('D:D', 15, money_format)  # TOTAL
+                worksheet.set_column('F:F', 12, percent_format)  # % PARTICIPACIÓN
+                worksheet.set_column('A:A', 35)  # CLIENTE
+                worksheet.set_column('B:B', 15)  # VENDEDOR
+                worksheet.set_column('C:C', 25)  # EMPRESA
+                worksheet.set_column('E:E', 12)  # CANTIDAD_COMPRAS
+            
+            st.download_button(
+                label="📥 EXCEL - Lista de clientes",
+                data=output_clientes.getvalue(),
+                file_name=f"mis_clientes_{usuario}_{año_clientes}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="btn_export_clientes_excel"
+            )
+        
+        with col_b2:
+            # Exportar a CSV
+            csv_clientes = clientes_resumen.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 CSV - Lista de clientes",
+                data=csv_clientes,
+                file_name=f"mis_clientes_{usuario}_{año_clientes}.csv",
+                mime="text/csv",
+                key="btn_export_clientes_csv"
+            )
+    else:
+        st.warning("No hay clientes que cumplan los criterios.")
+
+with tab_exp3:
+    st.markdown("### ⚙️ Exportación Avanzada")
+    st.markdown("Personaliza los campos a exportar")
+    
+    # Selección de columnas
+    todas_columnas = df.columns.tolist()
+    columnas_seleccionadas = st.multiselect(
+        "Selecciona las columnas a exportar:",
+        options=todas_columnas,
+        default=['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL'],
+        key="columnas_avanzado"
+    )
+    
+    if columnas_seleccionadas:
+        df_avanzado = df[columnas_seleccionadas].copy()
+        
+        # Filtro rápido
+        st.markdown("**🔍 Filtro rápido (por texto en cualquier columna):**")
+        filtro_texto = st.text_input("Buscar...", key="filtro_avanzado")
+        
+        if filtro_texto:
+            mask = df_avanzado.astype(str).apply(lambda x: x.str.contains(filtro_texto, case=False, na=False)).any(axis=1)
+            df_avanzado = df_avanzado[mask]
+        
+        st.markdown(f"**Total registros: {len(df_avanzado)}**")
+        
+        if not df_avanzado.empty:
+            # Preview
+            st.dataframe(df_avanzado.head(20), use_container_width=True)
+            
+            # Exportar
+            csv_avanzado = df_avanzado.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 DESCARGAR EXTRACTO PERSONALIZADO (CSV)",
+                data=csv_avanzado,
+                file_name=f"exportacion_personalizada_{usuario}.csv",
+                mime="text/csv",
+                key="btn_export_avanzado",
+                use_container_width=True
+            )
+
+
+
 # ✍️ Línea de autoría
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray;'>Aplicativo desarrollado por <b>Edward O.</b> © 2025</p>", unsafe_allow_html=True)
+
+
 
 # 🗺️ Mapa de Provincias Atendidas
 def quitar_tildes(texto):
