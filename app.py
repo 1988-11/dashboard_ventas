@@ -475,7 +475,7 @@ with st.container():
         (df_base['CLIENTE'].str.upper() != "ANULADO")
     ]
 
-    if vendedor_actual != "ALL":
+    if 'vendedor_actual' in st.session_state and st.session_state.vendedor_actual != "ALL":
         clientes_tw = clientes_tw[clientes_tw['VENDEDOR'] == vendedor_actual]
 
     clientes_tw = clientes_tw.groupby('CLIENTE', as_index=False)['TOTAL'].sum() \
