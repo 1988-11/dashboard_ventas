@@ -966,9 +966,26 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
         if provincia_sel != "TODAS LAS PROVINCIAS":
             df_dist = df_dist[df_dist['PROVINCIA'] == provincia_sel]
         
-        # 🔥 FILTRO EXTREMO - Eliminar cualquier año con decimales
-        df_dist = df_dist[df_dist['AÑO'].astype(float).round(0) == df_dist['AÑO'].astype(float)]
+        # 🔥 SOLUCIÓN RADICAL PARA AÑOS .5
+        # Convertir a numérico
+        df_dist['AÑO'] = pd.to_numeric(df_dist['AÑO'], errors='coerce')
         
+        # Crear columna de año entero
+        df_dist['AÑO_ENTERO'] = df_dist['AÑO'].round(0).astype(int)
+        
+        # Filtrar SOLO años que sean prácticamente enteros (diferencia < 0.01)
+        df_dist = df_dist[abs(df_dist['AÑO'] - df_dist['AÑO_ENTERO']) < 0.01]
+        
+        # Reemplazar AÑO por el entero
+        df_dist['AÑO'] = df_dist['AÑO_ENTERO']
+        
+        # Eliminar la columna temporal
+        df_dist = df_dist.drop(columns=['AÑO_ENTERO'])
+        
+        # Filtrar SOLO los años permitidos (2023-2026)
+        df_dist = df_dist[df_dist['AÑO'].isin([2023, 2024, 2025, 2026])]
+        
+               
         # Análisis por distrito
         if not df_dist.empty:
             # Resumen por distrito
@@ -1412,6 +1429,174 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
 # ✍️ Línea de autoría
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray;'>Aplicativo desarrollado por <b>Edward O.</b> © 2025</p>", unsafe_allow_html=True)
+
+# =============================================================================
+# 📤 SECCIÓN DE EXPORTACIÓN - VISIBLE PARA TODOS LOS USUARIOS
+# =============================================================================
+st.markdown("---")
+st.markdown("## 📤 EXPORTACIÓN DE DATOS")
+
+# Crear pestañas para exportación
+tab_exp1, tab_exp2, tab_exp3, tab_exp4 = st.tabs([
+    "📊 Mis Ventas", 
+    "👥 Mis Clientes", 
+    "🏙️ Clientes por Distrito",
+    "📍 Clientes por Provincia"
+])
+
+# Obtener el dataframe base (ya filtrado por vendedor si corresponde)
+df_export = df_base.copy()
+
+# ==============================================
+# PESTAÑA 1: MIS VENTAS
+# ==============================================
+with tab_exp1:
+    st.markdown("### 📊 Exportar mis ventas")
+    st.markdown(f"**Usuario actual:** {usuario} | **Vista:** {'Todos los vendedores' if vendedor_actual == 'ALL' else vendedor_actual}")
+    
+    # Filtros para la exportación
+    col_f1, col_f2 = st.columns(2)
+    
+    with col_f1:
+        años_export = st.multiselect(
+            "📆 Seleccionar años:",
+            options=sorted(df_export['AÑO'].unique()),
+            default=sorted(df_export['AÑO'].unique()),
+            key="exp_años"
+        )
+    
+    with col_f2:
+        empresas_export = st.multiselect(
+            "🏢 Seleccionar empresas:",
+            options=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
+            default=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
+            key="exp_empresas"
+        )
+    
+    # Aplicar filtros
+    df_exp_ventas = df_export.copy()
+    df_exp_ventas = df_exp_ventas[df_exp_ventas['AÑO'].isin(años_export)]
+    df_exp_ventas = df_exp_ventas[df_exp_ventas['EMPRESA'].isin(empresas_export)]
+    
+    # Seleccionar columnas
+    columnas_ventas = ['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']
+    df_exp_ventas = df_exp_ventas[columnas_ventas].copy()
+    
+    # Mostrar preview
+    st.markdown(f"**📋 Vista previa ({len(df_exp_ventas)} registros):**")
+    st.dataframe(df_exp_ventas.head(10), use_container_width=True)
+    
+    if not df_exp_ventas.empty:
+        csv_ventas = df_exp_ventas.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 DESCARGAR MIS VENTAS (CSV)",
+            data=csv_ventas,
+            file_name=f"mis_ventas_{usuario}.csv",
+            mime="text/csv",
+            key="btn_exp_ventas",
+            use_container_width=True
+        )
+
+# ==============================================
+# PESTAÑA 2: MIS CLIENTES
+# ==============================================
+with tab_exp2:
+    st.markdown("### 👥 Mis clientes")
+    
+    # Agrupar por cliente
+    clientes_resumen = df_export.groupby(['CLIENTE', 'VENDEDOR', 'EMPRESA']).agg({
+        'TOTAL': ['sum', 'count'],
+        'DISTRITO': 'first',
+        'PROVINCIA': 'first'
+    }).round(2)
+    
+    clientes_resumen.columns = ['TOTAL_VENTAS', 'NUM_COMPRAS', 'DISTRITO', 'PROVINCIA']
+    clientes_resumen = clientes_resumen.reset_index()
+    clientes_resumen = clientes_resumen.sort_values('TOTAL_VENTAS', ascending=False)
+    
+    st.markdown(f"**📋 Total clientes: {len(clientes_resumen)}**")
+    st.dataframe(clientes_resumen.head(20), use_container_width=True)
+    
+    if not clientes_resumen.empty:
+        csv_clientes = clientes_resumen.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 DESCARGAR LISTA DE CLIENTES (CSV)",
+            data=csv_clientes,
+            file_name=f"mis_clientes_{usuario}.csv",
+            mime="text/csv",
+            key="btn_exp_clientes",
+            use_container_width=True
+        )
+
+# ==============================================
+# PESTAÑA 3: CLIENTES POR DISTRITO
+# ==============================================
+with tab_exp3:
+    st.markdown("### 🏙️ Clientes por distrito")
+    
+    # Selector de distrito
+    distritos_exp = sorted(df_export['DISTRITO'].unique())
+    distrito_sel = st.selectbox("Seleccionar distrito:", ["TODOS"] + distritos_exp, key="exp_distrito")
+    
+    if distrito_sel != "TODOS":
+        df_distrito_exp = df_export[df_export['DISTRITO'] == distrito_sel]
+    else:
+        df_distrito_exp = df_export
+    
+    # Resumen por cliente en el distrito
+    clientes_distrito = df_distrito_exp.groupby(['CLIENTE', 'VENDEDOR', 'DISTRITO', 'PROVINCIA'])['TOTAL'].agg(['sum', 'count']).round(2)
+    clientes_distrito.columns = ['TOTAL_VENTAS', 'NUM_COMPRAS']
+    clientes_distrito = clientes_distrito.reset_index()
+    clientes_distrito = clientes_distrito.sort_values('TOTAL_VENTAS', ascending=False)
+    
+    st.markdown(f"**📋 Clientes en {distrito_sel}: {len(clientes_distrito)}**")
+    st.dataframe(clientes_distrito.head(20), use_container_width=True)
+    
+    if not clientes_distrito.empty:
+        csv_distrito = clientes_distrito.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 DESCARGAR CLIENTES POR DISTRITO (CSV)",
+            data=csv_distrito,
+            file_name=f"clientes_{distrito_sel}.csv",
+            mime="text/csv",
+            key="btn_exp_distrito",
+            use_container_width=True
+        )
+
+# ==============================================
+# PESTAÑA 4: CLIENTES POR PROVINCIA
+# ==============================================
+with tab_exp4:
+    st.markdown("### 📍 Clientes por provincia")
+    
+    # Selector de provincia
+    provincias_exp = sorted(df_export['PROVINCIA'].unique())
+    provincia_sel = st.selectbox("Seleccionar provincia:", ["TODAS"] + provincias_exp, key="exp_provincia")
+    
+    if provincia_sel != "TODAS":
+        df_provincia_exp = df_export[df_export['PROVINCIA'] == provincia_sel]
+    else:
+        df_provincia_exp = df_export
+    
+    # Resumen por cliente en la provincia
+    clientes_provincia = df_provincia_exp.groupby(['CLIENTE', 'VENDEDOR', 'DISTRITO', 'PROVINCIA'])['TOTAL'].agg(['sum', 'count']).round(2)
+    clientes_provincia.columns = ['TOTAL_VENTAS', 'NUM_COMPRAS']
+    clientes_provincia = clientes_provincia.reset_index()
+    clientes_provincia = clientes_provincia.sort_values('TOTAL_VENTAS', ascending=False)
+    
+    st.markdown(f"**📋 Clientes en {provincia_sel}: {len(clientes_provincia)}**")
+    st.dataframe(clientes_provincia.head(20), use_container_width=True)
+    
+    if not clientes_provincia.empty:
+        csv_provincia = clientes_provincia.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 DESCARGAR CLIENTES POR PROVINCIA (CSV)",
+            data=csv_provincia,
+            file_name=f"clientes_{provincia_sel}.csv",
+            mime="text/csv",
+            key="btn_exp_provincia",
+            use_container_width=True
+        )
 
 # 🗺️ Mapa de Provincias Atendidas
 def quitar_tildes(texto):
