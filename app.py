@@ -517,160 +517,308 @@ with st.container():
     st.dataframe(totales_empresas.rename(columns={"EMPRESA": "Empresa", "TOTAL": "Ventas Totales"}))
 
 # =============================================================================
-# 🆕 NUEVA SECCIÓN 1: COMPARADOR AVANZADO (SOLO PARA ADMIN)
+# 🆕 NUEVA SECCIÓN 1: COMPARADOR AVANZADO PROFESIONAL (SOLO PARA ADMIN)
 # =============================================================================
 if vendedor_actual == "ALL":  # Solo visible para admin
     st.markdown("---")
-    st.markdown("## 🎯 COMPARADOR AVANZADO (admin)")
-    st.markdown("### Personaliza tu comparación y visualiza los resultados")
+    st.markdown("## 🎯 COMPARADOR AVANZADO PROFESIONAL (admin)")
+    st.markdown("### Análisis comparativo con visualizaciones profesionales")
     
-    # Crear pestañas dentro del comparador
-    tab1, tab2 = st.tabs(["📊 Configurar Comparación", "📋 Ver Datos Detallados"])
+    # Estilo profesional para el comparador
+    st.markdown("""
+    <style>
+    .comparador-card {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 5px solid #003366;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .metric-card {
+        background-color: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        text-align: center;
+        border-bottom: 3px solid #003366;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
-    with tab1:
-        col1, col2, col3 = st.columns(3)
+    # Crear pestañas profesionales
+    tab_comp1, tab_comp2, tab_comp3, tab_comp4 = st.tabs([
+        "📊 Comparador General", 
+        "🏙️ Comparador por Distritos", 
+        "📈 Análisis de Tendencias",
+        "📋 Datos Detallados"
+    ])
+    
+    # ==============================================
+    # PESTAÑA 1: COMPARADOR GENERAL MEJORADO
+    # ==============================================
+    with tab_comp1:
+        st.markdown('<div class="comparador-card">', unsafe_allow_html=True)
+        st.markdown("### 📊 Panel de Control de Comparaciones")
         
-        with col1:
-            st.markdown("**📌 Eje X (Categorías)**")
+        # Diseño profesional en 3 columnas
+        col_param1, col_param2, col_param3 = st.columns(3)
+        
+        with col_param1:
+            st.markdown("**📌 EJE PRINCIPAL**")
             eje_x = st.selectbox(
-                "Selecciona qué quieres comparar:",
-                options=["PROVINCIA", "VENDEDOR", "AÑO", "MES", "EMPRESA"],
+                "Selecciona la dimensión principal:",
+                options=[
+                    "🏢 EMPRESA", 
+                    "🧑 VENDEDOR", 
+                    "📍 PROVINCIA", 
+                    "🏘️ DISTRITO", 
+                    "📆 AÑO", 
+                    "📅 MES"
+                ],
                 index=0,
-                key="comparador_eje_x"
+                key="prof_eje_x",
+                help="Selecciona qué quieres analizar en el eje X"
             )
+            # Limpiar el emoji para el nombre real de la columna
+            eje_x_real = eje_x.split(" ")[1] if " " in eje_x else eje_x
         
-        with col2:
-            st.markdown("**🎨 Agrupar por (Color)**")
+        with col_param2:
+            st.markdown("**🎨 AGRUPAR POR**")
             agrupar_por = st.selectbox(
-                "Selecciona el grupo de comparación:",
-                options=["AÑO", "VENDEDOR", "PROVINCIA", "MES", "EMPRESA", "NINGUNO"],
+                "Selecciona el grupo comparativo:",
+                options=[
+                    "📆 AÑO", 
+                    "🧑 VENDEDOR", 
+                    "🏢 EMPRESA", 
+                    "📍 PROVINCIA",
+                    "🏘️ DISTRITO",
+                    "📅 MES",
+                    "⚪ SIN AGRUPAR"
+                ],
                 index=0,
-                key="comparador_agrupar"
+                key="prof_agrupar",
+                help="Agrupa los datos para comparar"
             )
+            agrupar_real = agrupar_por.split(" ")[1] if " " in agrupar_por and agrupar_por != "⚪ SIN AGRUPAR" else "NINGUNO"
         
-        with col3:
-            st.markdown("**📏 Métrica a visualizar**")
-            metrica = st.selectbox(
+        with col_param3:
+            st.markdown("**📏 MÉTRICA**")
+            metrica = st.radio(
                 "Selecciona la métrica:",
-                options=["TOTAL (Suma de ventas)", "Cantidad de operaciones"],
-                index=0,
-                key="comparador_metrica"
+                options=["💰 Ventas Totales", "📊 Cantidad de Operaciones", "🎯 Ticket Promedio"],
+                horizontal=False,
+                key="prof_metrica",
+                help="Elige qué medir"
             )
         
-        # Filtros adicionales para el comparador
-        st.markdown("#### 🔍 Filtros adicionales para la comparación")
-        col_f1, col_f2, col_f3 = st.columns(3)
+        # Filtros avanzados
+        st.markdown("#### 🔍 FILTROS AVANZADOS")
+        col_filtro1, col_filtro2, col_filtro3, col_filtro4 = st.columns(4)
         
-        with col_f1:
-            años_disponibles = sorted(df_base['AÑO'].dropna().unique())
-            años_comp = st.multiselect(
-                "Años a incluir:",
-                options=años_disponibles,
-                default=años_disponibles,
-                key="filtro_años_comparador"
+        with col_filtro1:
+            años_prof = sorted(df_base['AÑO'].dropna().unique())
+            años_sel = st.multiselect(
+                "📆 Años",
+                options=años_prof,
+                default=años_prof,
+                key="prof_años"
             )
         
-        with col_f2:
-            empresas_comp = st.multiselect(
-                "Empresas:",
-                options=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
-                default=['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA'],
-                key="filtro_empresas_comparador"
+        with col_filtro2:
+            empresas_prof = ['INDUSTRIAS ELECTRICAS KBA', 'TEAMWORK KBA']
+            empresas_sel = st.multiselect(
+                "🏢 Empresas",
+                options=empresas_prof,
+                default=empresas_prof,
+                key="prof_empresas"
             )
         
-        with col_f3:
-            if eje_x != "VENDEDOR" and agrupar_por != "VENDEDOR":
-                vendedores_comp = st.multiselect(
-                    "Vendedores:",
-                    options=sorted(df_base['VENDEDOR'].unique()),
-                    default=[],
-                    key="filtro_vendedores_comparador"
-                )
-            else:
-                vendedores_comp = []
-                st.info("ℹ️ Vendedor ya está en ejes/grupos")
+        with col_filtro3:
+            # Provincias disponibles filtradas por otros criterios
+            provincias_prof = sorted(df_base[df_base['AÑO'].isin(años_sel) & 
+                                              df_base['EMPRESA'].isin(empresas_sel)]['PROVINCIA'].unique())
+            provincias_sel = st.multiselect(
+                "📍 Provincias",
+                options=provincias_prof,
+                default=[],
+                key="prof_provincias"
+            )
+        
+        with col_filtro4:
+            # Vendedores disponibles
+            vendedores_prof = sorted(df_base[df_base['AÑO'].isin(años_sel) & 
+                                              df_base['EMPRESA'].isin(empresas_sel)]['VENDEDOR'].unique())
+            vendedores_sel = st.multiselect(
+                "🧑 Vendedores",
+                options=vendedores_prof,
+                default=[],
+                key="prof_vendedores"
+            )
         
         # Aplicar filtros
-        df_comp = df_base.copy()
-        if años_comp:
-            df_comp = df_comp[df_comp['AÑO'].isin(años_comp)]
-        if empresas_comp:
-            df_comp = df_comp[df_comp['EMPRESA'].isin(empresas_comp)]
-        if vendedores_comp:
-            df_comp = df_comp[df_comp['VENDEDOR'].isin(vendedores_comp)]
+        df_prof = df_base.copy()
+        df_prof = df_prof[df_prof['AÑO'].isin(años_sel)]
+        df_prof = df_prof[df_prof['EMPRESA'].isin(empresas_sel)]
         
-        # Preparar datos según métrica seleccionada
-        if metrica == "TOTAL (Suma de ventas)":
-            if agrupar_por != "NINGUNO":
-                df_group = df_comp.groupby([eje_x, agrupar_por], as_index=False)['TOTAL'].sum()
-            else:
-                df_group = df_comp.groupby([eje_x], as_index=False)['TOTAL'].sum()
+        if provincias_sel:
+            df_prof = df_prof[df_prof['PROVINCIA'].isin(provincias_sel)]
+        if vendedores_sel:
+            df_prof = df_prof[df_prof['VENDEDOR'].isin(vendedores_sel)]
+        
+        # Calcular métricas
+        if metrica == "💰 Ventas Totales":
+            valor_col = 'TOTAL'
             titulo_metrica = "Ventas Totales (S/)"
             formato = "S/ {:,.0f}"
-        else:  # Cantidad de operaciones
-            if agrupar_por != "NINGUNO":
-                df_group = df_comp.groupby([eje_x, agrupar_por], as_index=False).size().rename(columns={'size': 'CANTIDAD'})
+            if agrupar_real != "NINGUNO":
+                df_group = df_prof.groupby([eje_x_real, agrupar_real], as_index=False)[valor_col].sum()
             else:
-                df_group = df_comp.groupby([eje_x], as_index=False).size().rename(columns={'size': 'CANTIDAD'})
+                df_group = df_prof.groupby([eje_x_real], as_index=False)[valor_col].sum()
+        
+        elif metrica == "📊 Cantidad de Operaciones":
+            valor_col = 'CANTIDAD'
             titulo_metrica = "Número de Operaciones"
             formato = "{:,.0f} ops"
+            if agrupar_real != "NINGUNO":
+                df_group = df_prof.groupby([eje_x_real, agrupar_real]).size().reset_index(name='CANTIDAD')
+            else:
+                df_group = df_prof.groupby([eje_x_real]).size().reset_index(name='CANTIDAD')
         
-        # Crear gráfico
+        else:  # Ticket Promedio
+            valor_col = 'TOTAL'
+            titulo_metrica = "Ticket Promedio (S/)"
+            formato = "S/ {:,.0f}"
+            if agrupar_real != "NINGUNO":
+                df_group = df_prof.groupby([eje_x_real, agrupar_real]).agg(
+                    TOTAL=('TOTAL', 'mean')
+                ).reset_index()
+            else:
+                df_group = df_prof.groupby([eje_x_real]).agg(
+                    TOTAL=('TOTAL', 'mean')
+                ).reset_index()
+        
+        # Métricas de resumen
+        if not df_prof.empty:
+            st.markdown("#### 📈 RESUMEN EJECUTIVO")
+            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+            
+            with col_m1:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                total_ventas = df_prof['TOTAL'].sum()
+                st.metric("💵 Ventas Totales", f"S/ {total_ventas:,.0f}")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            with col_m2:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                num_ops = len(df_prof)
+                st.metric("📦 Operaciones", f"{num_ops:,}")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            with col_m3:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                ticket_prom = total_ventas / num_ops if num_ops > 0 else 0
+                st.metric("🎫 Ticket Promedio", f"S/ {ticket_prom:,.0f}")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            with col_m4:
+                st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+                num_clientes = df_prof['CLIENTE'].nunique()
+                st.metric("👥 Clientes Únicos", f"{num_clientes}")
+                st.markdown('</div>', unsafe_allow_html=True)
+        
+        # GRÁFICO PROFESIONAL
         if not df_group.empty:
-            if agrupar_por != "NINGUNO":
-                # Gráfico de barras agrupadas
-                fig_comp = px.bar(
+            st.markdown("#### 📊 VISUALIZACIÓN PROFESIONAL")
+            
+            if agrupar_real != "NINGUNO":
+                # Gráfico de barras agrupado profesional
+                fig_prof = px.bar(
                     df_group, 
-                    x=eje_x, 
-                    y=df_group.columns[-1],  # La última columna es TOTAL o CANTIDAD
-                    color=agrupar_por,
+                    x=eje_x_real, 
+                    y=df_group.columns[-1],
+                    color=agrupar_real,
                     barmode='group',
-                    title=f"Comparación: {eje_x} por {agrupar_por}",
-                    labels={eje_x: eje_x.title(), df_group.columns[-1]: titulo_metrica, agrupar_por: agrupar_por.title()},
+                    title=f"<b>Comparación: {eje_x_real.title()} por {agrupar_real.title()}</b>",
+                    labels={
+                        eje_x_real: eje_x_real.title(), 
+                        df_group.columns[-1]: titulo_metrica, 
+                        agrupar_real: agrupar_real.title()
+                    },
                     text_auto=True,
-                    color_discrete_sequence=px.colors.qualitative.Bold
+                    color_discrete_sequence=px.colors.qualitative.Plotly,
+                    template='plotly_white'
                 )
-                fig_comp.update_traces(textposition='outside', textfont=dict(size=11))
                 
-                # Crear tabla pivote
-                tabla_pivot = df_group.pivot(index=eje_x, columns=agrupar_por, values=df_group.columns[-1]).fillna(0)
+                # Personalización profesional
+                fig_prof.update_traces(
+                    textposition='outside',
+                    textfont=dict(size=11, family='Segoe UI'),
+                    marker_line_width=1.5,
+                    marker_line_color='white'
+                )
+                
+                # Tabla pivote
+                tabla_pivot = df_group.pivot(
+                    index=eje_x_real, 
+                    columns=agrupar_real, 
+                    values=df_group.columns[-1]
+                ).fillna(0)
                 
             else:
-                # Gráfico de barras simple
-                fig_comp = px.bar(
+                # Gráfico de barras simple profesional
+                fig_prof = px.bar(
                     df_group, 
-                    x=eje_x, 
+                    x=eje_x_real, 
                     y=df_group.columns[-1],
-                    title=f"Comparación por {eje_x}",
-                    labels={eje_x: eje_x.title(), df_group.columns[-1]: titulo_metrica},
+                    title=f"<b>Análisis por {eje_x_real.title()}</b>",
+                    labels={eje_x_real: eje_x_real.title(), df_group.columns[-1]: titulo_metrica},
                     text_auto=True,
-                    color_discrete_sequence=['#3366CC']
+                    color_discrete_sequence=['#003366'],
+                    template='plotly_white'
                 )
-                fig_comp.update_traces(textposition='outside', textfont=dict(size=11))
-                tabla_pivot = df_group.set_index(eje_x)
+                fig_prof.update_traces(
+                    textposition='outside',
+                    textfont=dict(size=11, family='Segoe UI', color='white'),
+                    marker_line_width=1.5,
+                    marker_line_color='white',
+                    marker_color='#003366'
+                )
+                tabla_pivot = df_group.set_index(eje_x_real)
             
-            # Mejorar diseño del gráfico
-            fig_comp.update_layout(
-                xaxis_title=eje_x.title(),
+            # Mejoras de diseño profesional
+            fig_prof.update_layout(
+                xaxis_title=eje_x_real.title(),
                 yaxis_title=titulo_metrica,
-                plot_bgcolor='rgba(0,0,0,0.05)',
+                plot_bgcolor='rgba(0,0,0,0.02)',
                 paper_bgcolor='white',
                 font=dict(family='Segoe UI', size=14),
-                legend_title=agrupar_por.title() if agrupar_por != "NINGUNO" else "",
-                height=600,
-                margin=dict(l=50, r=50, t=80, b=80)
+                legend=dict(
+                    title=agrupar_real.title() if agrupar_real != "NINGUNO" else "",
+                    orientation='h',
+                    yanchor='bottom',
+                    y=1.02,
+                    xanchor='right',
+                    x=1
+                ),
+                height=550,
+                margin=dict(l=60, r=60, t=100, b=60),
+                hovermode='x unified'
             )
             
-            # Mostrar gráfico
-            st.plotly_chart(fig_comp, use_container_width=True, key="grafico_comparador")
+            # Mejorar ejes
+            fig_prof.update_xaxes(tickangle=-45 if len(df_group[eje_x_real].unique()) > 5 else 0)
             
-            # Mostrar tabla resumen
-            st.markdown("#### 📊 Tabla comparativa")
+            # Mostrar gráfico
+            st.plotly_chart(fig_prof, use_container_width=True, key="prof_grafico_general")
+            
+            # TABLA PROFESIONAL
+            st.markdown("#### 📋 TABLA COMPARATIVA DETALLADA")
             
             # Formatear tabla
             tabla_formateada = tabla_pivot.copy()
             for col in tabla_formateada.columns:
-                if metrica == "TOTAL (Suma de ventas)":
+                if metrica == "💰 Ventas Totales" or metrica == "🎯 Ticket Promedio":
                     tabla_formateada[col] = tabla_formateada[col].apply(lambda x: f"S/ {x:,.2f}")
                 else:
                     tabla_formateada[col] = tabla_formateada[col].apply(lambda x: f"{x:,.0f}")
@@ -681,287 +829,329 @@ if vendedor_actual == "ALL":  # Solo visible para admin
                 height=400
             )
             
-            # Botón para exportar tabla
-            csv = tabla_pivot.to_csv().encode('utf-8')
-            st.download_button(
-                label="📥 Descargar tabla comparativa (CSV)",
-                data=csv,
-                file_name=f"comparacion_{eje_x}_vs_{agrupar_por}.csv",
-                mime="text/csv",
-                key="btn_descargar_comparador"
-            )
-        else:
-            st.warning("⚠️ No hay datos con los filtros seleccionados")
-    
-    with tab2:
-        st.markdown("### 📋 Datos detallados de la comparación")
-        
-        # Selector de nivel de detalle
-        nivel_detalle = st.radio(
-            "Nivel de detalle:",
-            ["Resumen por grupo", "Todos los registros"],
-            horizontal=True,
-            key="nivel_detalle_comparador"
-        )
-        
-        if nivel_detalle == "Resumen por grupo":
-            # Mostrar el dataframe agrupado
-            if 'df_group' in locals() and not df_group.empty:
-                df_show = df_group.copy()
-                if metrica == "TOTAL (Suma de ventas)":
-                    df_show['TOTAL'] = df_show['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
-                else:
-                    df_show['CANTIDAD'] = df_show['CANTIDAD'].apply(lambda x: f"{x:,.0f}")
-                st.dataframe(df_show, use_container_width=True)
-        else:
-            # Mostrar todos los registros filtrados
-            df_detalle = df_comp[['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']].copy()
-            df_detalle['TOTAL'] = df_detalle['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
-            st.dataframe(df_detalle, use_container_width=True, height=500)
-            
-            # Botón para exportar detalle
-            csv_detalle = df_comp.to_csv().encode('utf-8')
-            st.download_button(
-                label="📥 Exportar todos los registros filtrados (CSV)",
-                data=csv_detalle,
-                file_name="registros_filtrados.csv",
-                mime="text/csv",
-                key="btn_descargar_detalle"
-            )
-
-# =============================================================================
-# 🆕 NUEVA SECCIÓN 2: EXPORTACIÓN DE DATOS PARA TODOS LOS USUARIOS
-# =============================================================================
-st.markdown("---")
-st.markdown("## 📤 EXPORTACIÓN DE DATOS")
-
-# Crear pestañas para las diferentes exportaciones
-tab_exp1, tab_exp2, tab_exp3 = st.tabs(["📊 Mis Ventas", "👥 Mis Clientes", "⚙️ Exportación Avanzada"])
-
-with tab_exp1:
-    st.markdown("### 📊 Exportar mis ventas")
-    st.markdown(f"**Usuario actual:** {usuario} | **Vista:** {'Todos los vendedores' if vendedor_actual == 'ALL' else vendedor_actual}")
-    
-    # Filtros para la exportación
-    col_f1, col_f2 = st.columns(2)
-    
-    with col_f1:
-        año_export = st.selectbox(
-            "Seleccionar año:",
-            options=["Todos"] + [2023, 2024, 2025, 2026],
-            index=0,
-            key="año_export_ventas"
-        )
-    
-    with col_f2:
-        empresa_export = st.selectbox(
-            "Seleccionar empresa:",
-            options=["Todas", "INDUSTRIAS ELECTRICAS KBA", "TEAMWORK KBA"],
-            index=0,
-            key="empresa_export_ventas"
-        )
-    
-    # Aplicar filtros
-    df_export_ventas = df.copy()
-    
-    if año_export != "Todos":
-        df_export_ventas = df_export_ventas[df_export_ventas['AÑO'] == año_export]
-    
-    if empresa_export != "Todas":
-        df_export_ventas = df_export_ventas[df_export_ventas['EMPRESA'] == empresa_export]
-    
-    # Seleccionar columnas relevantes
-    columnas_ventas = ['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']
-    df_export_ventas = df_export_ventas[columnas_ventas].copy()
-    
-    # Mostrar preview
-    st.markdown(f"**📋 Vista previa ({len(df_export_ventas)} registros):**")
-    df_preview = df_export_ventas.head(10).copy()
-    df_preview['TOTAL'] = df_preview['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
-    st.dataframe(df_preview, use_container_width=True)
-    
-    if len(df_export_ventas) > 10:
-        st.caption(f"Mostrando 10 de {len(df_export_ventas)} registros")
-    
-    # Botón de exportación
-    if not df_export_ventas.empty:
-        # Crear archivo Excel
-        import io
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df_export_ventas.to_excel(writer, sheet_name='Ventas', index=False)
-            
-            # Formato para moneda
-            workbook = writer.book
-            worksheet = writer.sheets['Ventas']
-            money_format = workbook.add_format({'num_format': 'S/ #,##0.00'})
-            worksheet.set_column('G:G', 15, money_format)  # Columna TOTAL
-            
-            # Ajustar ancho de columnas
-            worksheet.set_column('A:A', 12)  # FECHA
-            worksheet.set_column('B:B', 15)  # VENDEDOR
-            worksheet.set_column('C:C', 25)  # EMPRESA
-            worksheet.set_column('D:D', 30)  # CLIENTE
-            worksheet.set_column('E:E', 15)  # PROVINCIA
-            worksheet.set_column('F:F', 15)  # DISTRITO
-            worksheet.set_column('H:H', 8)   # AÑO
-            worksheet.set_column('I:I', 8)   # MES
-        
-        st.download_button(
-            label="📥 DESCARGAR MIS VENTAS EN EXCEL",
-            data=output.getvalue(),
-            file_name=f"mis_ventas_{usuario}_{año_export}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            key="btn_export_ventas",
-            use_container_width=True
-        )
-    else:
-        st.warning("No hay ventas para exportar con los filtros seleccionados.")
-
-with tab_exp2:
-    st.markdown("### 👥 Exportar mis clientes")
-    st.markdown("Listado de clientes únicos con el total de ventas acumulado")
-    
-    # Filtros para clientes
-    col_c1, col_c2 = st.columns(2)
-    
-    with col_c1:
-        año_clientes = st.selectbox(
-            "Año para clientes:",
-            options=["Todos los años"] + [2023, 2024, 2025, 2026],
-            index=0,
-            key="año_export_clientes"
-        )
-    
-    with col_c2:
-        min_venta = st.number_input(
-            "Venta mínima (S/):",
-            min_value=0,
-            value=0,
-            step=100,
-            key="min_venta_clientes"
-        )
-    
-    # Filtrar datos
-    df_clientes = df.copy()
-    
-    if año_clientes != "Todos los años":
-        df_clientes = df_clientes[df_clientes['AÑO'] == año_clientes]
-    
-    # Agrupar por cliente
-    clientes_resumen = df_clientes.groupby(['CLIENTE', 'VENDEDOR', 'EMPRESA']).agg({
-        'TOTAL': 'sum',
-        'FECHA': 'count'
-    }).rename(columns={'FECHA': 'CANTIDAD_COMPRAS'}).reset_index()
-    
-    # Filtrar por venta mínima
-    clientes_resumen = clientes_resumen[clientes_resumen['TOTAL'] >= min_venta]
-    clientes_resumen = clientes_resumen.sort_values('TOTAL', ascending=False)
-    
-    # Calcular porcentaje
-    total_ventas = clientes_resumen['TOTAL'].sum()
-    clientes_resumen['% PARTICIPACIÓN'] = (clientes_resumen['TOTAL'] / total_ventas * 100).round(2)
-    
-    # Mostrar preview
-    st.markdown(f"**📋 Vista previa - Top 10 clientes ({len(clientes_resumen)} clientes en total):**")
-    df_clientes_preview = clientes_resumen.head(10).copy()
-    df_clientes_preview['TOTAL'] = df_clientes_preview['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
-    df_clientes_preview['% PARTICIPACIÓN'] = df_clientes_preview['% PARTICIPACIÓN'].apply(lambda x: f"{x}%")
-    st.dataframe(df_clientes_preview, use_container_width=True)
-    
-    # Botones de exportación
-    if not clientes_resumen.empty:
-        col_b1, col_b2 = st.columns(2)
-        
-        with col_b1:
-            # Exportar a Excel
-            output_clientes = io.BytesIO()
-            with pd.ExcelWriter(output_clientes, engine='xlsxwriter') as writer:
-                clientes_resumen.to_excel(writer, sheet_name='Clientes', index=False)
-                
-                workbook = writer.book
-                worksheet = writer.sheets['Clientes']
-                
-                # Formatos
-                money_format = workbook.add_format({'num_format': 'S/ #,##0.00'})
-                percent_format = workbook.add_format({'num_format': '0.00%'})
-                
-                worksheet.set_column('D:D', 15, money_format)  # TOTAL
-                worksheet.set_column('F:F', 12, percent_format)  # % PARTICIPACIÓN
-                worksheet.set_column('A:A', 35)  # CLIENTE
-                worksheet.set_column('B:B', 15)  # VENDEDOR
-                worksheet.set_column('C:C', 25)  # EMPRESA
-                worksheet.set_column('E:E', 12)  # CANTIDAD_COMPRAS
-            
-            st.download_button(
-                label="📥 EXCEL - Lista de clientes",
-                data=output_clientes.getvalue(),
-                file_name=f"mis_clientes_{usuario}_{año_clientes}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                key="btn_export_clientes_excel"
-            )
-        
-        with col_b2:
-            # Exportar a CSV
-            csv_clientes = clientes_resumen.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="📥 CSV - Lista de clientes",
-                data=csv_clientes,
-                file_name=f"mis_clientes_{usuario}_{año_clientes}.csv",
-                mime="text/csv",
-                key="btn_export_clientes_csv"
-            )
-    else:
-        st.warning("No hay clientes que cumplan los criterios.")
-
-with tab_exp3:
-    st.markdown("### ⚙️ Exportación Avanzada")
-    st.markdown("Personaliza los campos a exportar")
-    
-    # Selección de columnas
-    todas_columnas = df.columns.tolist()
-    columnas_seleccionadas = st.multiselect(
-        "Selecciona las columnas a exportar:",
-        options=todas_columnas,
-        default=['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL'],
-        key="columnas_avanzado"
-    )
-    
-    if columnas_seleccionadas:
-        df_avanzado = df[columnas_seleccionadas].copy()
-        
-        # Filtro rápido
-        st.markdown("**🔍 Filtro rápido (por texto en cualquier columna):**")
-        filtro_texto = st.text_input("Buscar...", key="filtro_avanzado")
-        
-        if filtro_texto:
-            mask = df_avanzado.astype(str).apply(lambda x: x.str.contains(filtro_texto, case=False, na=False)).any(axis=1)
-            df_avanzado = df_avanzado[mask]
-        
-        st.markdown(f"**Total registros: {len(df_avanzado)}**")
-        
-        if not df_avanzado.empty:
-            # Preview
-            st.dataframe(df_avanzado.head(20), use_container_width=True)
-            
             # Exportar
-            csv_avanzado = df_avanzado.to_csv(index=False).encode('utf-8')
+            col_exp1, col_exp2 = st.columns(2)
+            with col_exp1:
+                csv_tabla = tabla_pivot.to_csv().encode('utf-8')
+                st.download_button(
+                    label="📥 DESCARGAR TABLA (CSV)",
+                    data=csv_tabla,
+                    file_name=f"comparacion_{eje_x_real}_vs_{agrupar_real}.csv",
+                    mime="text/csv",
+                    key="btn_prof_csv",
+                    use_container_width=True
+                )
+            
+            with col_exp2:
+                # Versión Excel simple
+                output_prof = io.BytesIO()
+                with pd.ExcelWriter(output_prof, engine='openpyxl') as writer:
+                    tabla_pivot.to_excel(writer, sheet_name='Comparacion')
+                st.download_button(
+                    label="📥 DESCARGAR TABLA (EXCEL)",
+                    data=output_prof.getvalue(),
+                    file_name=f"comparacion_{eje_x_real}_vs_{agrupar_real}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="btn_prof_excel",
+                    use_container_width=True
+                )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ==============================================
+    # PESTAÑA 2: COMPARADOR POR DISTRITOS (NUEVO)
+    # ==============================================
+    with tab_comp2:
+        st.markdown('<div class="comparador-card">', unsafe_allow_html=True)
+        st.markdown("### 🏙️ COMPARADOR PROFESIONAL DE DISTRITOS")
+        
+        st.markdown("""
+        <p style='color:#666; font-size:14px; margin-bottom:20px;'>
+        Análisis detallado del desempeño por distritos con indicadores clave y visualizaciones profesionales.
+        </p>
+        """, unsafe_allow_html=True)
+        
+        # Filtros específicos para distritos
+        col_dist1, col_dist2, col_dist3 = st.columns(3)
+        
+        with col_dist1:
+            años_dist = st.multiselect(
+                "📆 Años a comparar",
+                options=[2023, 2024, 2025, 2026],
+                default=[2025, 2026],
+                key="dist_años"
+            )
+        
+        with col_dist2:
+            provincias_dist = sorted(df_base[df_base['AÑO'].isin(años_dist)]['PROVINCIA'].unique())
+            provincia_sel = st.selectbox(
+                "📍 Seleccionar Provincia (opcional)",
+                options=["TODAS LAS PROVINCIAS"] + list(provincias_dist),
+                key="dist_provincia"
+            )
+        
+        with col_dist3:
+            top_n = st.slider(
+                "🎯 Top N distritos",
+                min_value=5,
+                max_value=30,
+                value=15,
+                step=5,
+                key="dist_top"
+            )
+        
+        # Filtrar datos para distritos
+        df_dist = df_base[df_base['AÑO'].isin(años_dist)].copy()
+        
+        if provincia_sel != "TODAS LAS PROVINCIAS":
+            df_dist = df_dist[df_dist['PROVINCIA'] == provincia_sel]
+        
+        # Análisis por distrito
+        if not df_dist.empty:
+            # Resumen por distrito
+            distritos_resumen = df_dist.groupby(['PROVINCIA', 'DISTRITO']).agg({
+                'TOTAL': ['sum', 'mean', 'count'],
+                'CLIENTE': 'nunique'
+            }).round(2)
+            
+            distritos_resumen.columns = ['VENTAS_TOTALES', 'TICKET_PROMEDIO', 'OPERACIONES', 'CLIENTES_UNICOS']
+            distritos_resumen = distritos_resumen.reset_index()
+            distritos_resumen = distritos_resumen.sort_values('VENTAS_TOTALES', ascending=False).head(top_n)
+            
+            # Métricas generales
+            st.markdown("#### 📊 MÉTRICAS GLOBALES DE DISTRITOS")
+            col_md1, col_md2, col_md3, col_md4 = st.columns(4)
+            
+            with col_md1:
+                st.metric(
+                    "🏙️ Distritos Atendidos",
+                    f"{len(distritos_resumen)}",
+                    help="Número de distritos en el top"
+                )
+            
+            with col_md2:
+                st.metric(
+                    "💰 Ventas Totales",
+                    f"S/ {distritos_resumen['VENTAS_TOTALES'].sum():,.0f}",
+                    help="Suma de ventas de todos los distritos"
+                )
+            
+            with col_md3:
+                st.metric(
+                    "📦 Total Operaciones",
+                    f"{distritos_resumen['OPERACIONES'].sum():,.0f}",
+                    help="Total de operaciones"
+                )
+            
+            with col_md4:
+                st.metric(
+                    "👥 Clientes Atendidos",
+                    f"{distritos_resumen['CLIENTES_UNICOS'].sum():,.0f}",
+                    help="Total de clientes únicos"
+                )
+            
+            # GRÁFICO 1: Top Distritos por Ventas
+            st.markdown("#### 🏆 TOP DISTRITOS POR VENTAS")
+            
+            fig_dist1 = px.bar(
+                distritos_resumen.head(10),
+                x='VENTAS_TOTALES',
+                y='DISTRITO',
+                orientation='h',
+                title=f"<b>Top 10 Distritos por Ventas Totales</b>",
+                labels={'VENTAS_TOTALES': 'Ventas Totales (S/)', 'DISTRITO': 'Distrito'},
+                text=distritos_resumen.head(10)['VENTAS_TOTALES'].apply(lambda x: f"S/ {x:,.0f}"),
+                color='VENTAS_TOTALES',
+                color_continuous_scale='Blues',
+                template='plotly_white'
+            )
+            
+            fig_dist1.update_traces(
+                textposition='inside',
+                textfont=dict(size=12, color='white', family='Segoe UI'),
+                marker_line_width=1,
+                marker_line_color='white'
+            )
+            
+            fig_dist1.update_layout(
+                height=500,
+                xaxis_title="Ventas Totales (S/)",
+                yaxis_title="",
+                plot_bgcolor='rgba(0,0,0,0.02)',
+                paper_bgcolor='white',
+                font=dict(family='Segoe UI', size=12),
+                coloraxis_showscale=False,
+                margin=dict(l=150, r=20, t=50, b=50)
+            )
+            
+            st.plotly_chart(fig_dist1, use_container_width=True, key="fig_distritos_ventas")
+            
+            # GRÁFICO 2: Comparativo Ticket Promedio vs Operaciones
+            st.markdown("#### 📈 ANÁLISIS DE RENDIMIENTO POR DISTRITO")
+            
+            fig_dist2 = px.scatter(
+                distritos_resumen,
+                x='OPERACIONES',
+                y='TICKET_PROMEDIO',
+                size='VENTAS_TOTALES',
+                color='PROVINCIA',
+                hover_name='DISTRITO',
+                title="<b>Matriz de Rendimiento: Operaciones vs Ticket Promedio</b>",
+                labels={
+                    'OPERACIONES': 'Número de Operaciones',
+                    'TICKET_PROMEDIO': 'Ticket Promedio (S/)',
+                    'VENTAS_TOTALES': 'Ventas Totales'
+                },
+                template='plotly_white',
+                size_max=50
+            )
+            
+            fig_dist2.update_layout(
+                height=500,
+                plot_bgcolor='rgba(0,0,0,0.02)',
+                paper_bgcolor='white',
+                font=dict(family='Segoe UI', size=12)
+            )
+            
+            st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
+            
+            # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
+            if len(años_dist) > 1:
+                st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
+                
+                # Preparar datos para heatmap
+                distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))]
+                heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
+                heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
+                
+                fig_heat = px.imshow(
+                    heat_pivot,
+                    text_auto='.0f',
+                    aspect="auto",
+                    color_continuous_scale='Viridis',
+                    title="<b>Evolución de Ventas por Distrito (2023-2026)</b>",
+                    labels=dict(x="Año", y="Distrito", color="Ventas (S/)")
+                )
+                
+                fig_heat.update_layout(
+                    height=500,
+                    plot_bgcolor='white',
+                    paper_bgcolor='white',
+                    font=dict(family='Segoe UI', size=12)
+                )
+                
+                st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
+            
+            # TABLA DETALLADA
+            st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
+            
+            # Formatear tabla
+            distritos_show = distritos_resumen.copy()
+            distritos_show['VENTAS_TOTALES'] = distritos_show['VENTAS_TOTALES'].apply(lambda x: f"S/ {x:,.2f}")
+            distritos_show['TICKET_PROMEDIO'] = distritos_show['TICKET_PROMEDIO'].apply(lambda x: f"S/ {x:,.2f}")
+            
+            st.dataframe(
+                distritos_show,
+                use_container_width=True,
+                height=400,
+                column_config={
+                    "PROVINCIA": "Provincia",
+                    "DISTRITO": "Distrito",
+                    "VENTAS_TOTALES": "Ventas Totales",
+                    "TICKET_PROMEDIO": "Ticket Promedio",
+                    "OPERACIONES": "Operaciones",
+                    "CLIENTES_UNICOS": "Clientes Únicos"
+                }
+            )
+            
+            # Exportar datos de distritos
+            col_exp_dist1, col_exp_dist2 = st.columns(2)
+            
+            with col_exp_dist1:
+                csv_dist = distritos_resumen.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 EXPORTAR ANÁLISIS DE DISTRITOS (CSV)",
+                    data=csv_dist,
+                    file_name=f"analisis_distritos_{'_'.join(map(str, años_dist))}.csv",
+                    mime="text/csv",
+                    key="btn_dist_csv",
+                    use_container_width=True
+                )
+            
+            with col_exp_dist2:
+                # Detalle de clientes por distrito
+                st.download_button(
+                    label="📥 EXPORTAR CLIENTES POR DISTRITO (CSV)",
+                    data=df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'])][['DISTRITO', 'CLIENTE', 'TOTAL']].to_csv(index=False).encode('utf-8'),
+                    file_name=f"clientes_por_distrito.csv",
+                    mime="text/csv",
+                    key="btn_dist_clientes",
+                    use_container_width=True
+                )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ==============================================
+    # PESTAÑA 3: ANÁLISIS DE TENDENCIAS
+    # ==============================================
+    with tab_comp3:
+        st.markdown('<div class="comparador-card">', unsafe_allow_html=True)
+        st.markdown("### 📈 ANÁLISIS DE TENDENCIAS")
+        st.markdown("Evolución temporal y proyecciones")
+        
+        # Aquí puedes agregar más análisis de tendencias si lo deseas
+        st.info("🔧 Sección en desarrollo - Próximamente: análisis predictivo y proyecciones")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # ==============================================
+    # PESTAÑA 4: DATOS DETALLADOS
+    # ==============================================
+    with tab_comp4:
+        st.markdown('<div class="comparador-card">', unsafe_allow_html=True)
+        st.markdown("### 📋 DATOS DETALLADOS")
+        
+        # Mostrar todos los registros filtrados
+        if 'df_prof' in locals() and not df_prof.empty:
+            df_detalle = df_prof[['FECHA', 'VENDEDOR', 'EMPRESA', 'CLIENTE', 'PROVINCIA', 'DISTRITO', 'TOTAL', 'AÑO', 'MES']].copy()
+            df_detalle['TOTAL'] = df_detalle['TOTAL'].apply(lambda x: f"S/ {x:,.2f}")
+            
+            st.dataframe(
+                df_detalle,
+                use_container_width=True,
+                height=500,
+                column_config={
+                    "FECHA": "Fecha",
+                    "VENDEDOR": "Vendedor",
+                    "EMPRESA": "Empresa",
+                    "CLIENTE": "Cliente",
+                    "PROVINCIA": "Provincia",
+                    "DISTRITO": "Distrito",
+                    "TOTAL": "Total",
+                    "AÑO": "Año",
+                    "MES": "Mes"
+                }
+            )
+            
+            # Exportar detalle
+            csv_detalle = df_prof.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="📥 DESCARGAR EXTRACTO PERSONALIZADO (CSV)",
-                data=csv_avanzado,
-                file_name=f"exportacion_personalizada_{usuario}.csv",
+                label="📥 EXPORTAR TODOS LOS REGISTROS (CSV)",
+                data=csv_detalle,
+                file_name="registros_detallados.csv",
                 mime="text/csv",
-                key="btn_export_avanzado",
+                key="btn_detalle_csv",
                 use_container_width=True
             )
+        else:
+            st.warning("⚠️ No hay datos para mostrar. Aplica filtros en la pestaña 'Comparador General' primero.")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
-
-
+   
 # ✍️ Línea de autoría
 st.markdown("---")
 st.markdown("<p style='text-align:center; color:gray;'>Aplicativo desarrollado por <b>Edward O.</b> © 2025</p>", unsafe_allow_html=True)
-
-
 
 # 🗺️ Mapa de Provincias Atendidas
 def quitar_tildes(texto):
