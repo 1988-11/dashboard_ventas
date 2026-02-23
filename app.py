@@ -1196,103 +1196,103 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
             st.plotly_chart(fig_dist2, use_container_width=True, key="fig_distritos_scatter")
 
          # GRÁFICO 3: Heatmap de Distritos por Año (si hay múltiples años)
-            if len(años_dist) > 1:
-                st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
-                
-                # Preparar datos para heatmap
-                distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))].copy()
-                
-                # 🔥 CORRECCIÓN 1: Forzar años a numérico y redondear
-                distritos_heat['AÑO'] = pd.to_numeric(distritos_heat['AÑO'], errors='coerce')
-                
-                # 🔥 CORRECCIÓN 2: Crear columna de año entero
-                distritos_heat['AÑO_ENTERO'] = distritos_heat['AÑO'].round(0).astype(int)
-                
-                # 🔥 CORRECCIÓN 3: Filtrar SOLO años que sean casi enteros (eliminar .5)
-                distritos_heat = distritos_heat[abs(distritos_heat['AÑO'] - distritos_heat['AÑO_ENTERO']) < 0.1]
-                
-                # 🔥 CORRECCIÓN 4: Reemplazar AÑO por el entero
-                distritos_heat['AÑO'] = distritos_heat['AÑO_ENTERO']
-                
-                # 🔥 CORRECCIÓN 5: Filtrar SOLO los años que queremos (2023-2026)
-                distritos_heat = distritos_heat[distritos_heat['AÑO'].isin([2023, 2024, 2025, 2026])]
-                
-                # Agrupar por DISTRITO y AÑO
-                heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
-                
-                if heat_data.empty:
-                    st.warning("⚠️ No hay datos de años enteros para mostrar el heatmap")
-                else:
-                    # Crear pivot table
-                    heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
-                    
-                    # Ordenar años cronológicamente
-                    años_ordenados = sorted(heat_pivot.columns)
-                    heat_pivot = heat_pivot[años_ordenados]
-                    
-                    # Crear heatmap con go.Heatmap
-                    fig_heat = go.Figure(data=go.Heatmap(
-                        z=heat_pivot.values,
-                        x=[str(año) for año in heat_pivot.columns],  # Años como string
-                        y=heat_pivot.index,
-                        colorscale='Viridis',
-                        text=heat_pivot.values,
-                        texttemplate='%{text:,.0f}',
-                        textfont=dict(size=11, family='Arial Black', color='white'),
-                        hoverongaps=False,
-                        colorbar=dict(
-                            title=dict(
-                                text="Ventas (S/)",
-                                font=dict(size=13, family='Arial Black', color='black')
-                            ),
-                            tickfont=dict(size=12, family='Arial', color='black'),
-                            tickformat=',.0f',
-                            len=0.8,
-                            thickness=20
-                        )
-                    ))
-                    
-                    # Personalizar layout
-                    fig_heat.update_layout(
-                        title=dict(
-                            text="<b>Evolución de Ventas por Distrito</b>",
-                            font=dict(size=18, family='Arial Black', color='#003366')
-                        ),
-                        height=600,
-                        plot_bgcolor='white',
-                        paper_bgcolor='white',
-                        font=dict(family='Arial', size=12, color='black'),
-                        xaxis=dict(
-                            title=dict(
-                                text="Año",
-                                font=dict(size=16, family='Arial Black', color='black', weight='bold')
-                            ),
-                            tickfont=dict(
-                                size=14,
-                                family='Arial Black',
-                                color='black',
-                                weight='bold'
-                            ),
-                            tickangle=0,
-                            side='bottom'
-                        ),
-                        yaxis=dict(
-                            title=dict(
-                                text="Distrito",
-                                font=dict(size=16, family='Arial Black', color='black', weight='bold')
-                            ),
-                            tickfont=dict(
-                                size=11,
-                                family='Arial Black',
-                                color='black',
-                                weight='bold'
-                            ),
-                            automargin=True
-                        ),
-                        margin=dict(l=180, r=50, t=80, b=80)
-                    )
-                    
-                    st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
+if len(años_dist) > 1:
+    st.markdown("#### 🔥 HEATMAP: Evolución de Ventas por Distrito")
+    
+    # Preparar datos para heatmap
+    distritos_heat = df_dist[df_dist['DISTRITO'].isin(distritos_resumen['DISTRITO'].head(15))].copy()
+    
+    # 🔥 CORRECCIÓN 1: Forzar años a numérico y redondear
+    distritos_heat['AÑO'] = pd.to_numeric(distritos_heat['AÑO'], errors='coerce')
+    
+    # 🔥 CORRECCIÓN 2: Crear columna de año entero
+    distritos_heat['AÑO_ENTERO'] = distritos_heat['AÑO'].round(0).astype(int)
+    
+    # 🔥 CORRECCIÓN 3: Filtrar SOLO años que sean casi enteros (eliminar .5)
+    distritos_heat = distritos_heat[abs(distritos_heat['AÑO'] - distritos_heat['AÑO_ENTERO']) < 0.1]
+    
+    # 🔥 CORRECCIÓN 4: Reemplazar AÑO por el entero
+    distritos_heat['AÑO'] = distritos_heat['AÑO_ENTERO']
+    
+    # 🔥 CORRECCIÓN 5: Filtrar SOLO los años que queremos (2023-2026)
+    distritos_heat = distritos_heat[distritos_heat['AÑO'].isin([2023, 2024, 2025, 2026])]
+    
+    # Agrupar por DISTRITO y AÑO
+    heat_data = distritos_heat.groupby(['DISTRITO', 'AÑO'])['TOTAL'].sum().reset_index()
+    
+    if heat_data.empty:
+        st.warning("⚠️ No hay datos de años enteros para mostrar el heatmap")
+    else:
+        # Crear pivot table
+        heat_pivot = heat_data.pivot(index='DISTRITO', columns='AÑO', values='TOTAL').fillna(0)
+        
+        # 🔥 CORRECCIÓN FINAL: Ordenar años cronológicamente y forzar a enteros
+        años_ordenados = sorted(heat_pivot.columns.astype(int))
+        heat_pivot = heat_pivot[años_ordenados]
+        
+        # Crear heatmap con go.Heatmap
+        fig_heat = go.Figure(data=go.Heatmap(
+            z=heat_pivot.values,
+            x=[str(año) for año in años_ordenados],  # Años como string, ya enteros
+            y=heat_pivot.index,
+            colorscale='Viridis',
+            text=heat_pivot.values,
+            texttemplate='%{text:,.0f}',
+            textfont=dict(size=11, family='Arial Black', color='white'),
+            hoverongaps=False,
+            colorbar=dict(
+                title=dict(
+                    text="Ventas (S/)",
+                    font=dict(size=13, family='Arial Black', color='black')
+                ),
+                tickfont=dict(size=12, family='Arial', color='black'),
+                tickformat=',.0f',
+                len=0.8,
+                thickness=20
+            )
+        ))
+        
+        # Personalizar layout
+        fig_heat.update_layout(
+            title=dict(
+                text="<b>Evolución de Ventas por Distrito</b>",
+                font=dict(size=18, family='Arial Black', color='#003366')
+            ),
+            height=600,
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(family='Arial', size=12, color='black'),
+            xaxis=dict(
+                title=dict(
+                    text="Año",
+                    font=dict(size=16, family='Arial Black', color='black', weight='bold')
+                ),
+                tickfont=dict(
+                    size=14,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                tickangle=0,
+                side='bottom'
+            ),
+            yaxis=dict(
+                title=dict(
+                    text="Distrito",
+                    font=dict(size=16, family='Arial Black', color='black', weight='bold')
+                ),
+                tickfont=dict(
+                    size=11,
+                    family='Arial Black',
+                    color='black',
+                    weight='bold'
+                ),
+                automargin=True
+            ),
+            margin=dict(l=180, r=50, t=80, b=80)
+        )
+        
+        st.plotly_chart(fig_heat, use_container_width=True, key="fig_distritos_heat")
                 
             # 🔥 MEJORA 7: TABLA DETALLADA CON COMAS DE MILLARES
             st.markdown("#### 📋 TABLA DETALLADA DE DISTRITOS")
