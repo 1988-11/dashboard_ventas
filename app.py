@@ -68,9 +68,17 @@ if st.session_state.usuario is None:
     
 
 # 🧠 Cargar datos automáticamente al iniciar
+# 🧠 Cargar datos automáticamente al iniciar
 if "df" not in st.session_state:
     try:
         df = pd.read_excel("ventas.xlsm", sheet_name='Ventas', header=0)
+        
+        # 🔥 CORRECCIÓN: Forzar que AÑO sea entero (sin decimales)
+        if 'AÑO' in df.columns:
+            # Convertir a número y redondear
+            df['AÑO'] = pd.to_numeric(df['AÑO'], errors='coerce')
+            df['AÑO'] = df['AÑO'].round(0).astype('Int64')
+            
         st.session_state["df"] = df
         st.success("✅ Datos cargados automáticamente desde ventas.xlsm")
     except Exception as e:
@@ -89,18 +97,27 @@ if st.button("🔄 Recargar datos desde Excel"):
 if "df" in st.session_state:
     df = st.session_state["df"]
 
-    # 🧼 Limpieza de columnas
-    df.columns = [str(c).replace('/', '').strip().upper() for c in df.columns]
+   # 🧼 Limpieza de columnas
+df.columns = [str(c).replace('/', '').strip().upper() for c in df.columns]
 
-    # 🔢 Convertir columnas clave
-    df['TOTAL'] = pd.to_numeric(df['TOTAL'], errors='coerce')
-    df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
+# 🔢 Convertir columnas clave
+df['TOTAL'] = pd.to_numeric(df['TOTAL'], errors='coerce')
+df['FECHA'] = pd.to_datetime(df['FECHA'], errors='coerce')
 
-    # 🧠 Derivar columna AÑO y MES desde FECHA si no existen o están vacías
-    if 'AÑO' not in df.columns or df['AÑO'].isnull().all():
-        df['AÑO'] = df['FECHA'].dt.year
-    if 'MES' not in df.columns or df['MES'].isnull().all():
-        df['MES'] = df['FECHA'].dt.strftime('%b').str.capitalize()
+# 🔥 CORRECCIÓN: Asegurar que AÑO sea entero
+if 'AÑO' in df.columns:
+    # Si existe, limpiar decimales
+    df['AÑO'] = pd.to_numeric(df['AÑO'], errors='coerce')
+    df['AÑO'] = df['AÑO'].round(0).astype('Int64')
+else:
+    # Si no existe, crearlo desde FECHA
+    df['AÑO'] = df['FECHA'].dt.year
+
+# 🔥 CORRECCIÓN: Limpiar MES
+if 'MES' in df.columns:
+    df['MES'] = df['MES'].astype(str).str.strip().str.capitalize()
+else:
+    df['MES'] = df['FECHA'].dt.strftime('%b').str.capitalize()
 
     # 🧹 Normalización de texto
     df['VENDEDOR'] = df['VENDEDOR'].astype(str).str.strip().str.upper()
@@ -667,7 +684,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
         if vendedores_sel:
             df_prof = df_prof[df_prof['VENDEDOR'].isin(vendedores_sel)]
         
-        # Calcular métricas
+                # Calcular métricas
         if metrica == "💰 Ventas Totales":
             valor_col = 'TOTAL'
             titulo_metrica = "Ventas Totales (S/)"
@@ -676,7 +693,13 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 df_group = df_prof.groupby([eje_x_real, agrupar_real], as_index=False)[valor_col].sum()
             else:
                 df_group = df_prof.groupby([eje_x_real], as_index=False)[valor_col].sum()
-        
+            
+            # 🔥 CORRECCIÓN: Convertir años a enteros después del groupby
+            if eje_x_real == 'AÑO':
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
+            if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
+
         elif metrica == "📊 Cantidad de Operaciones":
             valor_col = 'CANTIDAD'
             titulo_metrica = "Número de Operaciones"
@@ -685,7 +708,13 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 df_group = df_prof.groupby([eje_x_real, agrupar_real]).size().reset_index(name='CANTIDAD')
             else:
                 df_group = df_prof.groupby([eje_x_real]).size().reset_index(name='CANTIDAD')
-        
+            
+            # 🔥 CORRECCIÓN: Convertir años a enteros después del groupby
+            if eje_x_real == 'AÑO':
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
+            if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
+
         else:  # Ticket Promedio
             valor_col = 'TOTAL'
             titulo_metrica = "Ticket Promedio (S/)"
@@ -698,6 +727,12 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                 df_group = df_prof.groupby([eje_x_real]).agg(
                     TOTAL=('TOTAL', 'mean')
                 ).reset_index()
+            
+            # 🔥 CORRECCIÓN: Convertir años a enteros después del groupby
+            if eje_x_real == 'AÑO':
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
+            if agrupar_real == 'AÑO' and agrupar_real != "NINGUNO":
+                df_group['AÑO'] = df_group['AÑO'].astype(int)
         
         # Métricas de resumen
         if not df_prof.empty:
@@ -766,12 +801,18 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
                     texttemplate='%{text:,.0f}'  # 🔥 MEJORA: Formato con comas
                 )
                 
-                # Tabla pivote
+                                # Tabla pivote
                 tabla_pivot = df_group.pivot(
                     index=eje_x_real, 
                     columns=agrupar_real, 
                     values=df_group.columns[-1]
                 ).fillna(0)
+                
+                # 🔥 CORRECCIÓN: Asegurar que los índices de años sean enteros
+                if eje_x_real == 'AÑO':
+                    tabla_pivot.index = tabla_pivot.index.astype(int)
+                if agrupar_real == 'AÑO':
+                    tabla_pivot.columns = tabla_pivot.columns.astype(int)
                 
             else:
                 # Gráfico de barras simple profesional
