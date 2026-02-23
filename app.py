@@ -966,6 +966,9 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
         if provincia_sel != "TODAS LAS PROVINCIAS":
             df_dist = df_dist[df_dist['PROVINCIA'] == provincia_sel]
         
+        # 🔥 FILTRO EXTREMO - Eliminar cualquier año con decimales
+        df_dist = df_dist[df_dist['AÑO'].astype(float).round(0) == df_dist['AÑO'].astype(float)]
+        
         # Análisis por distrito
         if not df_dist.empty:
             # Resumen por distrito
