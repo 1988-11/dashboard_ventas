@@ -522,7 +522,7 @@ import io  # Asegúrate de tener esto al inicio del archivo
 
 if vendedor_actual == "ALL":  # Solo visible para ADMIN
     st.markdown("---")
-    st.markdown("## 🎯 COMPARADOR AVANZADO PROFESIONAL")
+    st.markdown("## 🎯 COMPARADOR INTERACTIVO")
     st.markdown("### Análisis comparativo con visualizaciones profesionales")
     
     # Estilo profesional para el comparador
@@ -730,7 +730,7 @@ if vendedor_actual == "ALL":  # Solo visible para ADMIN
         
         # GRÁFICO PROFESIONAL CON EJES LEGIBLES
         if not df_group.empty:
-            st.markdown("#### 📊 VISUALIZACIÓN PROFESIONAL")
+            st.markdown("#### 📊 VISUALIZACIÓN DINAMICA")
             
             # 🔥 MEJORA 1: Convertir años a string para evitar decimales
             if eje_x_real == 'AÑO':
