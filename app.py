@@ -29,6 +29,7 @@ USUARIOS = {
     "MariaJanet": {"password": "76029937", "vendedor": "MARIA JANET"},
     "Milena": {"password": "09668821", "vendedor": "MILENA"},
     "WalterBejarano": {"password": "30857970", "vendedor": "WALTER BEJARANO"},
+    "MarceloCastillo": {"password": "00000000", "vendedor": "MARCELO CASTILLO"},
     "YeseniaFlores": {"password": "40368177", "vendedor": "YESENIA FLORES"},
 }
 
