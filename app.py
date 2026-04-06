@@ -398,7 +398,7 @@ with st.container():
         tabla_mensual = tabla_mensual.reindex(orden_meses)
         fila_total = tabla_mensual.sum(numeric_only=True); fila_total.name = 'TOTAL'
         tabla_mensual = pd.concat([tabla_mensual, pd.DataFrame([fila_total])])
-        tabla_formateada = tabla_mensual.applymap(lambda x: f"S/ {x:,.2f}" if pd.notnull(x) else "–")
+        tabla_formateada = tabla_mensual.map(lambda x: f"S/ {x:,.2f}" if pd.notnull(x) else "–")
         st.dataframe(
             tabla_formateada.style.set_properties(**{
                 'background-color': '#ffffff', 'color': '#000000',
