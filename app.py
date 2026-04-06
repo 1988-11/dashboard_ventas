@@ -253,7 +253,7 @@ with st.container():
             'INDUSTRIAS ELECTRICAS KBA': 'INDUSTRIAS ELECTRICAS K&A',
             'TEAMWORK KBA': 'TEAMWORK K&A'
         })
-        tabla_formateada = tabla_pivot.applymap(lambda x: f"S/ {x:,.2f}")
+        tabla_formateada = tabla_pivot.map(lambda x: f"S/ {x:,.2f}")
         st.dataframe(
             tabla_formateada.style.set_properties(**{
                 'background-color': '#ffffff',
